@@ -26,7 +26,7 @@ public class LiftbotApp {
             if(payload.getEvent().getText().contains("hello")) {
                 String userName = context.client().usersInfo(r -> r
                         .token(context.getBotToken())
-                        .user(payload.getEvent().getUser())).getUser().getName();
+                        .user(payload.getEvent().getUser())).getUser().getRealName();
                 context.say("hey " + userName);
             } else {
                 context.say("beep boop here comes the joop");
