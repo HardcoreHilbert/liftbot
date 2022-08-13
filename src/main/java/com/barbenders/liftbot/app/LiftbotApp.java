@@ -24,7 +24,7 @@ public class LiftbotApp {
         liftbotApp.command("/hello", (slashCommandRequest, context) -> context.ack("BeepBoop here comes the joop"));
         liftbotApp.event(AppMentionEvent.class, (payload,context) ->{
             if(payload.getEvent().getText().contains("hello")) {
-                context.say("hey " + payload.getEvent().getUsername());
+                context.say("hey " + payload.getEvent().getUser());
             } else {
                 context.say("beep boop here comes the joop");
             }
