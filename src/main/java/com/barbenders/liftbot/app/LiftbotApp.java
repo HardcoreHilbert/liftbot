@@ -1,4 +1,4 @@
-package com.barbenders.liftbot.service;
+package com.barbenders.liftbot.app;
 
 import com.slack.api.bolt.App;
 import org.springframework.context.annotation.Bean;
@@ -9,9 +9,7 @@ public class LiftbotApp {
     @Bean
     public App initLiftbotApp(){
         App liftbotApp = new App();
-        liftbotApp.command("/hello", (slashCommandRequest, context) -> {
-            return context.ack("BeepBoop here comes the joop");
-        });
+        liftbotApp.command("/hello", (slashCommandRequest, context) -> context.ack("BeepBoop here comes the joop"));
         return liftbotApp;
     }
 }
