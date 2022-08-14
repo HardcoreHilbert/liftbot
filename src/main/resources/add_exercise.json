@@ -1,24 +1,6 @@
 {
   "type": "home",
-  "title": {
-    "type": "plain_text",
-    "text": "Add Exercise",
-    "emoji": true
-  },
-  "submit": {
-    "type": "plain_text",
-    "text": "Submit",
-    "emoji": true
-  },
-  "close": {
-    "type": "plain_text",
-    "text": "Cancel",
-    "emoji": true
-  },
   "blocks": [
-    {
-      "type": "divider"
-    },
     {
       "type": "section",
       "text": {
@@ -94,6 +76,19 @@
         "text": "Weight",
         "emoji": true
       }
+    },
+    {
+      "type": "actions",
+      "elements":[
+        {
+          "type":"button",
+          "text":{
+            "type":"plain_text",
+            "text":"Save",
+            "emoji":true
+          }
+        }
+      ]
     }
   ]
 }
