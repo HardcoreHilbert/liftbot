@@ -65,6 +65,7 @@ public class LiftbotApp {
     private void initAddExerciseHomeView(App liftbotApp) {
         liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
             String userId = request.getEvent().getUser();
+            LOGGER.info("user: {}",userId);
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
                         .viewAsString(new String(Files.readAllBytes(new ClassPathResource("add_exercise.json").getFile().toPath())))
