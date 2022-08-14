@@ -19,7 +19,7 @@ bootJar {
 	archiveClassifier.set('boot')
 }
 dependencies {
-	//implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
+	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'com.slack.api:bolt-servlet:1.24.0'
 
