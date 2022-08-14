@@ -2,10 +2,15 @@ package com.barbenders.liftbot.app;
 
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.methods.request.views.ViewsPublishRequest;
+import com.slack.api.model.event.AppHomeOpenedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.io.ClassPathResource;
+
+import java.nio.file.Files;
 
 @Configuration
 public class LiftbotApp {
@@ -25,6 +30,7 @@ public class LiftbotApp {
         App liftbotApp = new App(config);
 
         initBotCommands(liftbotApp);
+        initAddExerciseHomeView(liftbotApp);
 //        liftbotApp.event(AppMentionEvent.class, (payload,context) ->{
 //            if(payload.getEvent().getText().contains("hello")) {
 //                String userName = context.client().usersInfo(r -> r
@@ -53,6 +59,19 @@ public class LiftbotApp {
         liftbotApp.command("/add", (slashCommandRequest, context) -> {
             LOGGER.debug("/add command received: {}",slashCommandRequest.getPayload().getText());
             return context.ack("command received: " + slashCommandRequest.getPayload().getText());
+        });
+    }
+
+    private void initAddExerciseHomeView(App liftbotApp) {
+        liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
+            String userId = request.getEvent().getUser();
+            ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                    .viewAsString(new String(Files.readAllBytes(new ClassPathResource("add_exercise.json").getFile().toPath())))
+                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .userId(userId)
+                    .build();
+            context.client().viewsPublish(addView);
+            return context.ack();
         });
     }
 }
