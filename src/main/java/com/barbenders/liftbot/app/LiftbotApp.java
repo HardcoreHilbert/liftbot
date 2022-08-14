@@ -65,12 +65,16 @@ public class LiftbotApp {
     private void initAddExerciseHomeView(App liftbotApp) {
         liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
             String userId = request.getEvent().getUser();
-            ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                    .viewAsString(new String(Files.readAllBytes(new ClassPathResource("add_exercise.json").getFile().toPath())))
-                    .token(System.getenv("SLACK_BOT_TOKEN"))
-                    .userId(userId)
-                    .build();
-            context.client().viewsPublish(addView);
+            try {
+                ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                        .viewAsString(new String(Files.readAllBytes(new ClassPathResource("add_exercise.json").getFile().toPath())))
+                        .token(System.getenv("SLACK_BOT_TOKEN"))
+                        .userId(userId)
+                        .build();
+                context.client().viewsPublish(addView);
+            } catch(Exception e) {
+                LOGGER.error("Exception: ",e);
+            }
             return context.ack();
         });
     }
