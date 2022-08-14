@@ -1,5 +1,5 @@
 {
-  "type": "modal",
+  "type": "home",
   "title": {
     "type": "plain_text",
     "text": "Add Exercise",
