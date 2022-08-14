@@ -16,8 +16,8 @@ public interface ExerciseRepository extends MongoRepository<Exercise, String> {
     List<Exercise> getAllExercisesForUser(String userid);
 
     @Query("{name: ?0}")
-    public Exercise getAllExercisesByName(String name);
+    List<Exercise> getAllExercisesByName(String name);
 
     @Query("{equipment: ?0}")
-    public Exercise getAllExercisesByEquipment(String equipment);
+    List<Exercise> getAllExercisesByEquipment(String equipment);
 }
