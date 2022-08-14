@@ -44,10 +44,10 @@ public class LiftbotApp {
         liftbotApp.command("/hello", (slashCommandRequest, context) -> {
             StringBuilder menu = new StringBuilder("----COMMANDS AVAILABLE----\n");
             menu.append("/hello  [print command menu]\n");
-            menu.append("/add    [COMING SOON]");
-            menu.append("/get    [COMING SOON]");
-            menu.append("/update [COMING SOON]");
-            menu.append("/delete [COMING SOON]");
+            menu.append("/add    [COMING SOON]\n");
+            menu.append("/get    [COMING SOON]\n");
+            menu.append("/update [COMING SOON]\n");
+            menu.append("/delete [COMING SOON]\n");
             return context.ack(menu.toString());
         });
 
