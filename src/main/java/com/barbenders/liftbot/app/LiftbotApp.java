@@ -72,7 +72,7 @@ public class LiftbotApp {
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
                         .viewAsString(new ObjectMapper().readValue(
-                                new ClassPathResource("add_exercise.json").getInputStream(),String.class))
+                                new ClassPathResource("add_exercise.json").getFile(),String.class))
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
