@@ -1,21 +1,25 @@
 package com.barbenders.liftbot.app;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
-import java.nio.file.Files;
+import java.io.File;
 
 @Configuration
 public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
+
+    @Value("classpath:resources/add_exercise.json")
+    File addExercise;
 
     @Bean
     public AppConfig loadSingleWorkspaceAppConfig() {
@@ -71,8 +75,9 @@ public class LiftbotApp {
             String userId = request.getEvent().getUser();
             LOGGER.info("user: {}",userId);
             try {
+
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .viewAsString(new String(Files.readAllBytes(new ClassPathResource("add_exercise.json").getFile().toPath())))
+                        .viewAsString(new ObjectMapper().readValue(addExercise,String.class))
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
