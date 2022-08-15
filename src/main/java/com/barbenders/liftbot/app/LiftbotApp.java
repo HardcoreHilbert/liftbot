@@ -18,7 +18,7 @@ public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
 
-    @Value("classpath:resources/add_exercise.json")
+    @Value("classpath:add_exercise.json")
     File addExercise;
 
     @Bean
