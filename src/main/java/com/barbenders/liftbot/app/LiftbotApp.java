@@ -9,7 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.util.ResourceUtils;
+import org.springframework.core.io.ClassPathResource;
 
 @Configuration
 public class LiftbotApp {
@@ -72,7 +72,7 @@ public class LiftbotApp {
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
                         .viewAsString(new ObjectMapper().readValue(
-                                ResourceUtils.getFile("classpath:add_exercise.json"),String.class))
+                                new ClassPathResource("add_exercise.json").getInputStream(),String.class))
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
