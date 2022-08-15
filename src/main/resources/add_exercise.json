@@ -86,7 +86,8 @@
             "type":"plain_text",
             "text":"Save",
             "emoji":true
-          }
+          },
+          "action_id": "exercise_save"
         }
       ]
     }
