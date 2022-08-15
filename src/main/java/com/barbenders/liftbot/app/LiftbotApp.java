@@ -19,6 +19,7 @@ public class LiftbotApp {
 
     @Bean
     public AppConfig loadSingleWorkspaceAppConfig() {
+        LOGGER.info("loading single workspace app configuration");
         return AppConfig.builder()
                 .singleTeamBotToken(System.getenv("SLACK_BOT_TOKEN"))
                 .signingSecret(System.getenv("SLACK_SIGNING_SECRET"))
@@ -27,6 +28,7 @@ public class LiftbotApp {
 
     @Bean
     public App initLiftbotApp(AppConfig config){
+        LOGGER.info("initializing LiftBot application");
         App liftbotApp = new App(config);
 
         initBotCommands(liftbotApp);
@@ -46,6 +48,7 @@ public class LiftbotApp {
     }
 
     private void initBotCommands(App liftbotApp) {
+        LOGGER.info("initializing LiftBot commands");
         liftbotApp.command("/lbmenu", (slashCommandRequest, context) -> {
             StringBuilder menu = new StringBuilder("----COMMANDS AVAILABLE----\n");
             menu.append("/lbmenu  [print command menu]\n");
@@ -63,6 +66,7 @@ public class LiftbotApp {
     }
 
     private void initAddExerciseHomeView(App liftbotApp) {
+        LOGGER.info("initializing LiftBot view Add Exercise");
         liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
             String userId = request.getEvent().getUser();
             LOGGER.info("user: {}",userId);
