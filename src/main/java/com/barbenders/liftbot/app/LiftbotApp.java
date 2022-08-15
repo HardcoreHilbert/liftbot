@@ -1,6 +1,5 @@
 package com.barbenders.liftbot.app;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
@@ -10,6 +9,10 @@ import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
+
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.util.stream.Collectors;
 
 @Configuration
 public class LiftbotApp {
@@ -69,10 +72,13 @@ public class LiftbotApp {
         liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
             String userId = request.getEvent().getUser();
             LOGGER.info("user: {}",userId);
+            String viewString = new BufferedReader(new InputStreamReader(
+                    new ClassPathResource("add_exercise.json").getInputStream()))
+                    .lines().collect(Collectors.joining());
+            LOGGER.debug("viewString: {}", viewString);
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .viewAsString(new ObjectMapper().readValue(
-                                new ClassPathResource("add_exercise.json").getFile(),String.class))
+                        .viewAsString(viewString)
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
