@@ -7,19 +7,14 @@ import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.File;
+import org.springframework.util.ResourceUtils;
 
 @Configuration
 public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
-
-    @Value("classpath:add_exercise.json")
-    File addExercise;
 
     @Bean
     public AppConfig loadSingleWorkspaceAppConfig() {
@@ -75,9 +70,9 @@ public class LiftbotApp {
             String userId = request.getEvent().getUser();
             LOGGER.info("user: {}",userId);
             try {
-
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .viewAsString(new ObjectMapper().readValue(addExercise,String.class))
+                        .viewAsString(new ObjectMapper().readValue(
+                                ResourceUtils.getFile("classpath:add_exercise.json"),String.class))
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
