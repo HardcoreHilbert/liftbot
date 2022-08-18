@@ -4,6 +4,7 @@ import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.event.AppHomeOpenedEvent;
+import com.slack.api.model.view.ViewState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Bean;
@@ -90,8 +91,12 @@ public class LiftbotApp {
         });
 
         liftbotApp.blockAction("exercise_save", (request,context) -> {
-
-            LOGGER.info(request.getPayload().getView().getState().getValues().get("exercise_name_input").toString());
+            ViewState viewState = request.getPayload().getView().getState();
+            LOGGER.info(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
+            LOGGER.info(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
+            LOGGER.info(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
+            LOGGER.info(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
+            LOGGER.info(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
             return context.ack();
         });
     }

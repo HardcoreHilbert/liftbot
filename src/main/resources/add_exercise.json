@@ -31,6 +31,7 @@
       }
     },
     {
+      "block_id": "equipment_needed_input",
       "type": "input",
       "element": {
         "type": "plain_text_input",
@@ -43,6 +44,7 @@
       }
     },
     {
+      "block_id": "sets_input",
       "type": "input",
       "element": {
         "type": "plain_text_input",
@@ -55,6 +57,7 @@
       }
     },
     {
+      "block_id": "reps_input",
       "type": "input",
       "element": {
         "type": "plain_text_input",
@@ -67,6 +70,7 @@
       }
     },
     {
+      "block_id": "weight_input",
       "type": "input",
       "element": {
         "type": "plain_text_input",
