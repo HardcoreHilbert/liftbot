@@ -18,6 +18,7 @@
       }
     },
     {
+      "block_id": "exercise_name_input",
       "type": "input",
       "element": {
         "type": "plain_text_input",
