@@ -90,7 +90,7 @@ public class LiftbotApp {
         });
 
         liftbotApp.blockAction("exercise_save", (request,context) -> {
-            LOGGER.info(request.getPayload().getState().getValues().toString());
+            LOGGER.info(request.getPayload().getActions().toString());
             return context.ack();
         });
     }
