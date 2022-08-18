@@ -88,5 +88,10 @@ public class LiftbotApp {
             }
             return context.ack();
         });
+
+        liftbotApp.blockAction("exercise_save", (request,context) -> {
+            LOGGER.info(request.getPayload().toString());
+            return context.ack();
+        });
     }
 }
