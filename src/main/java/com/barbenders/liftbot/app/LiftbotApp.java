@@ -1,5 +1,7 @@
 package com.barbenders.liftbot.app;
 
+import com.barbenders.liftbot.model.Exercise;
+import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
@@ -7,6 +9,7 @@ import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.ViewState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
@@ -19,6 +22,9 @@ import java.util.stream.Collectors;
 public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
+
+    @Autowired
+    ExerciseRepository repo;
 
     @Bean
     public AppConfig loadSingleWorkspaceAppConfig() {
@@ -34,45 +40,18 @@ public class LiftbotApp {
         LOGGER.info("initializing LiftBot application");
         App liftbotApp = new App(config);
 
-        initBotCommands(liftbotApp);
+
         initAddExerciseHomeView(liftbotApp);
-//        liftbotApp.event(AppMentionEvent.class, (payload,context) ->{
-//            if(payload.getEvent().getText().contains("hello")) {
-//                String userName = context.client().usersInfo(r -> r
-//                        .token(context.getBotToken())
-//                        .user(payload.getEvent().getUser())).getUser().getRealName();
-//                context.say("hey " + userName);
-//            } else {
-//                context.say("beep boop here comes the joop");
-//            }
-//            return context.ack();
-//        });
+        initSaveAction(liftbotApp);
+
         return liftbotApp;
-    }
-
-    private void initBotCommands(App liftbotApp) {
-        LOGGER.info("initializing LiftBot commands");
-        liftbotApp.command("/lbmenu", (slashCommandRequest, context) -> {
-            StringBuilder menu = new StringBuilder("----COMMANDS AVAILABLE----\n");
-            menu.append("/lbmenu  [print command menu]\n");
-            menu.append("/add    [COMING SOON]\n");
-            menu.append("/get    [COMING SOON]\n");
-            menu.append("/update [COMING SOON]\n");
-            menu.append("/delete [COMING SOON]\n");
-            return context.ack(menu.toString());
-        });
-
-        liftbotApp.command("/add", (slashCommandRequest, context) -> {
-            LOGGER.debug("/add command received: {}",slashCommandRequest.getPayload().getText());
-            return context.ack("command received: " + slashCommandRequest.getPayload().getText());
-        });
     }
 
     private void initAddExerciseHomeView(App liftbotApp) {
         LOGGER.info("initializing LiftBot view Add Exercise");
-        liftbotApp.event(AppHomeOpenedEvent.class, (request, context) ->{
+        liftbotApp.event(AppHomeOpenedEvent.class, (request, context) -> {
             String userId = request.getEvent().getUser();
-            LOGGER.info("user: {}",userId);
+            LOGGER.info("user: {}", userId);
             String viewString = new BufferedReader(new InputStreamReader(
                     new ClassPathResource("add_exercise.json").getInputStream()))
                     .lines().collect(Collectors.joining());
@@ -84,20 +63,26 @@ public class LiftbotApp {
                         .userId(userId)
                         .build();
                 context.client().viewsPublish(addView);
-            } catch(Exception e) {
-                LOGGER.error("Exception: ",e);
+            } catch (Exception e) {
+                LOGGER.error("Exception: ", e);
             }
             return context.ack();
         });
+    }
 
+    private void initSaveAction(App liftbotApp) {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
             ViewState viewState = request.getPayload().getView().getState();
-            LOGGER.info(viewState.getValues().get("user_selection").toString());
-            LOGGER.info(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
-            LOGGER.info(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
-            LOGGER.info(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
-            LOGGER.info(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
-            LOGGER.info(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
+            Exercise exerciseRecord = new Exercise();
+            exerciseRecord.setUserid(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser());
+            exerciseRecord.setUserid(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setUserid(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setUserid(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setUserid(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setUserid(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
+            LOGGER.info("saving record to database: {}",exerciseRecord);
+            repo.save(exerciseRecord);
+            context.respond("saved record to database: " + exerciseRecord);
             return context.ack();
         });
     }

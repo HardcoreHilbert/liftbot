@@ -82,4 +82,14 @@ public class Exercise {
     public void setWeight(String weight) {
         this.weight = weight;
     }
+
+    @Override
+    public String toString() {
+        return "[userid:" + userid +
+                ", name:" + name +
+                ", equipment:" + equipment +
+                ", sets:" + sets +
+                ", reps:" + reps +
+                ", weight:" + weight + "]";
+    }
 }
