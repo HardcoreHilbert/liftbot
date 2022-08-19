@@ -75,11 +75,11 @@ public class LiftbotApp {
             ViewState viewState = request.getPayload().getView().getState();
             Exercise exerciseRecord = new Exercise();
             exerciseRecord.setUserid(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser());
-            exerciseRecord.setUserid(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setUserid(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setUserid(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setUserid(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setUserid(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setName(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setEquipment(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setSets(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setReps(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
+            exerciseRecord.setWeight(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
             LOGGER.info("saving record to database: {}",exerciseRecord);
             repo.save(exerciseRecord);
             context.respond("saved record to database: " + exerciseRecord);
