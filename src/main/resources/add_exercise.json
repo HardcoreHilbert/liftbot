@@ -2,6 +2,7 @@
   "type": "home",
   "blocks": [
     {
+      "block_id": "user_selection",
       "type": "section",
       "text": {
         "type": "mrkdwn",

@@ -92,6 +92,7 @@ public class LiftbotApp {
 
         liftbotApp.blockAction("exercise_save", (request,context) -> {
             ViewState viewState = request.getPayload().getView().getState();
+            LOGGER.info(viewState.getValues().get("user_selection").toString());
             LOGGER.info(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
             LOGGER.info(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
             LOGGER.info(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
