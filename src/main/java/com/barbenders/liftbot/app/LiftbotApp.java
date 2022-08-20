@@ -19,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -95,8 +96,10 @@ public class LiftbotApp {
             ContextBlock tableLayout = ContextBlock.builder().blockId("exercise_table").build();
             tableLayout.getElements().add(htmlElement);
 
-            View savedRecordView = new View();
-            savedRecordView.setType("home");
+            View savedRecordView = View.builder()
+                    .type("home")
+                    .blocks(new ArrayList<>())
+                    .build();
             savedRecordView.getBlocks().add(tableLayout);
 
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
