@@ -5,8 +5,12 @@ import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
-import com.slack.api.model.block.ContextBlock;
+import com.slack.api.model.block.HeaderBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.SectionBlock;
 import com.slack.api.model.block.composition.MarkdownTextObject;
+import com.slack.api.model.block.composition.PlainTextObject;
+import com.slack.api.model.block.composition.TextObject;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState;
@@ -91,18 +95,10 @@ public class LiftbotApp {
             LOGGER.info("saving record to database: {}",exerciseRecord);
             repo.save(exerciseRecord);
 
-
-            MarkdownTextObject htmlElement = MarkdownTextObject.builder()
-                    .text(createTableMarkdown(exerciseRecord.getUserid()))
-                    .build();
-            ContextBlock tableLayout = ContextBlock.builder().blockId("exercise_table").build();
-            tableLayout.getElements().add(htmlElement);
-
             View savedRecordView = View.builder()
                     .type("home")
-                    .blocks(new ArrayList<>())
+                    .blocks(createTableBlock(exerciseRecord.getUserid()))
                     .build();
-            savedRecordView.getBlocks().add(tableLayout);
 
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)
@@ -114,31 +110,36 @@ public class LiftbotApp {
         });
     }
 
-    private String createTableMarkdown(String userId) {
+    private List<LayoutBlock> createTableBlock(String userId) {
         List<Exercise> allRecords = repo.getAllExercisesForUser(userId);
-        String oth = OPEN + "th" + CLOSE;
-        String cth = OPEN + "/th" + CLOSE;
-        String otd = OPEN + "td" + CLOSE;
-        String ctd = OPEN + "/td" + CLOSE;
-        StringBuilder markdownText = new StringBuilder(OPEN).append("table").append(CLOSE);
-        markdownText.append(OPEN).append("tr").append(CLOSE);
-        markdownText.append(oth).append("Exercise Name").append(cth);
-        markdownText.append(oth).append("Equipment Needed").append(cth);
-        markdownText.append(oth).append("Sets").append(cth);
-        markdownText.append(oth).append("Reps").append(cth);
-        markdownText.append(oth).append("Weight").append(cth);
-        markdownText.append(OPEN).append("/tr").append(CLOSE);
+        List<LayoutBlock> blocks = new ArrayList<>();
+
+        //build title
+        HeaderBlock title = HeaderBlock.builder()
+                .text(new PlainTextObject(userId,true)).build();
+        blocks.add(0,title);
+
+        List<TextObject> fields = new ArrayList<>();
+        fields.add(MarkdownTextObject.builder().text("*Exercise Name*").build());
+        fields.add(MarkdownTextObject.builder().text("*Equipment Needed*").build());
+        fields.add(MarkdownTextObject.builder().text("*Sets*").build());
+        fields.add(MarkdownTextObject.builder().text("*Reps*").build());
+        fields.add(MarkdownTextObject.builder().text("*Weight*").build());
+        SectionBlock header = SectionBlock.builder().fields(fields).build();
+        blocks.add(1,header);
+
+        int count = 2;
         for(Exercise record : allRecords) {
-            markdownText.append(OPEN).append("tr").append(CLOSE);
-            markdownText.append(otd).append(record.getName()).append(ctd);
-            markdownText.append(otd).append(record.getEquipment()).append(ctd);
-            markdownText.append(otd).append(record.getSets()).append(ctd);
-            markdownText.append(otd).append(record.getReps()).append(ctd);
-            markdownText.append(otd).append(record.getWeight()).append(ctd);
-            markdownText.append(OPEN).append("/tr").append(CLOSE);
+            List<TextObject> recordLine = new ArrayList<>();
+            recordLine.add(MarkdownTextObject.builder().text(record.getName()).build());
+            recordLine.add(MarkdownTextObject.builder().text(record.getEquipment()).build());
+            recordLine.add(MarkdownTextObject.builder().text(record.getSets()).build());
+            recordLine.add(MarkdownTextObject.builder().text(record.getReps()).build());
+            recordLine.add(MarkdownTextObject.builder().text(record.getWeight()).build());
+            blocks.add(count,SectionBlock.builder().fields(recordLine).build());
+            count++;
         }
-        markdownText.append(OPEN).append("/table").append(CLOSE);
-        return markdownText.toString();
+        return blocks;
     }
 
 }
