@@ -5,7 +5,10 @@ import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
+import com.slack.api.model.block.ContextBlock;
+import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.event.AppHomeOpenedEvent;
+import com.slack.api.model.view.View;
 import com.slack.api.model.view.ViewState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +19,7 @@ import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -72,6 +76,7 @@ public class LiftbotApp {
 
     private void initSaveAction(App liftbotApp) {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
+            String userId = request.getPayload().getUser().getId();
             ViewState viewState = request.getPayload().getView().getState();
             Exercise exerciseRecord = new Exercise();
             exerciseRecord.setUserid(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser());
@@ -82,8 +87,49 @@ public class LiftbotApp {
             exerciseRecord.setWeight(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
             LOGGER.info("saving record to database: {}",exerciseRecord);
             repo.save(exerciseRecord);
-            context.respond("saved record to database: " + exerciseRecord);
+
+
+            MarkdownTextObject htmlElement = MarkdownTextObject.builder()
+                    .text(createTableMarkdown(exerciseRecord.getUserid()))
+                    .build();
+            ContextBlock tableLayout = ContextBlock.builder().blockId("exercise_table").build();
+            tableLayout.getElements().add(htmlElement);
+
+            View savedRecordView = new View();
+            savedRecordView.setType("home");
+            savedRecordView.getBlocks().add(tableLayout);
+
+            ViewsPublishRequest updateView = ViewsPublishRequest.builder()
+                    .view(savedRecordView)
+                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .userId(userId)
+                    .build();
+            context.client().viewsPublish(updateView);
             return context.ack();
         });
     }
+
+    private String createTableMarkdown(String userId) {
+        List<Exercise> allRecords = repo.getAllExercisesForUser(userId);
+        StringBuilder markdownText = new StringBuilder("<table>");
+        markdownText.append("<tr>");
+        markdownText.append("<th>Exercise Name</th>");
+        markdownText.append("<th>Equipment Needed</th>");
+        markdownText.append("<th>Sets</th>");
+        markdownText.append("<th>Reps</th>");
+        markdownText.append("<th>Weight</th>");
+        markdownText.append("</tr>");
+        for(Exercise record : allRecords) {
+            markdownText.append("<tr>");
+            markdownText.append("<td>").append(record.getName()).append("</td>");
+            markdownText.append("<td>").append(record.getEquipment()).append("</td>");
+            markdownText.append("<td>").append(record.getSets()).append("</td>");
+            markdownText.append("<td>").append(record.getReps()).append("</td>");
+            markdownText.append("<td>").append(record.getWeight()).append("</td>");
+            markdownText.append("</tr>");
+        }
+        markdownText.append("</table>");
+        return markdownText.toString();
+    }
+
 }
