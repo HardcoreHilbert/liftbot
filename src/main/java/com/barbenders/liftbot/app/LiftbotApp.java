@@ -28,6 +28,8 @@ public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
 
+    private static final String OPEN = "&lt;";
+    private static final String CLOSE = "&gt;";
     @Autowired
     ExerciseRepository repo;
 
@@ -114,24 +116,28 @@ public class LiftbotApp {
 
     private String createTableMarkdown(String userId) {
         List<Exercise> allRecords = repo.getAllExercisesForUser(userId);
-        StringBuilder markdownText = new StringBuilder("<table>");
-        markdownText.append("<tr>");
-        markdownText.append("<th>Exercise Name</th>");
-        markdownText.append("<th>Equipment Needed</th>");
-        markdownText.append("<th>Sets</th>");
-        markdownText.append("<th>Reps</th>");
-        markdownText.append("<th>Weight</th>");
-        markdownText.append("</tr>");
+        String oth = OPEN + "th" + CLOSE;
+        String cth = OPEN + "/th" + CLOSE;
+        String otd = OPEN + "td" + CLOSE;
+        String ctd = OPEN + "/td" + CLOSE;
+        StringBuilder markdownText = new StringBuilder(OPEN).append("table").append(CLOSE);
+        markdownText.append(OPEN).append("tr").append(CLOSE);
+        markdownText.append(oth).append("Exercise Name").append(cth);
+        markdownText.append(oth).append("Equipment Needed").append(cth);
+        markdownText.append(oth).append("Sets").append(cth);
+        markdownText.append(oth).append("Reps").append(cth);
+        markdownText.append(oth).append("Weight").append(cth);
+        markdownText.append(OPEN).append("/tr").append(CLOSE);
         for(Exercise record : allRecords) {
-            markdownText.append("<tr>");
-            markdownText.append("<td>").append(record.getName()).append("</td>");
-            markdownText.append("<td>").append(record.getEquipment()).append("</td>");
-            markdownText.append("<td>").append(record.getSets()).append("</td>");
-            markdownText.append("<td>").append(record.getReps()).append("</td>");
-            markdownText.append("<td>").append(record.getWeight()).append("</td>");
-            markdownText.append("</tr>");
+            markdownText.append(OPEN).append("tr").append(CLOSE);
+            markdownText.append(otd).append(record.getName()).append(ctd);
+            markdownText.append(otd).append(record.getEquipment()).append(ctd);
+            markdownText.append(otd).append(record.getSets()).append(ctd);
+            markdownText.append(otd).append(record.getReps()).append(ctd);
+            markdownText.append(otd).append(record.getWeight()).append(ctd);
+            markdownText.append(OPEN).append("/tr").append(CLOSE);
         }
-        markdownText.append("</table>");
+        markdownText.append(OPEN).append("/table").append(CLOSE);
         return markdownText.toString();
     }
 
