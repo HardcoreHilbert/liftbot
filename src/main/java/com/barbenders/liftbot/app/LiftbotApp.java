@@ -214,7 +214,12 @@ public class LiftbotApp {
             BlockActionPayload.User user = request.getPayload().getUser();
             LOGGER.debug("user using the app: {}", user.getUsername());
 
-            User selectedUser = getUserWithId(context, getSelectedUserIdFromRequest(request));
+            User selectedUser;
+            try {
+                selectedUser = getUserWithId(context, getSelectedUserIdFromRequest(request));
+            } catch (NullPointerException npe) {
+                selectedUser = getUserWithId(context, user.getId());
+            }
             LOGGER.debug("selected user: {}",selectedUser.getRealName());
 
             View viewRecordsView = View.builder()
