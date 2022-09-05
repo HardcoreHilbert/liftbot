@@ -5,7 +5,12 @@ import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
+import com.slack.api.bolt.context.builtin.ActionContext;
+import com.slack.api.bolt.request.builtin.BlockActionRequest;
+import com.slack.api.methods.SlackApiException;
+import com.slack.api.methods.request.users.UsersInfoRequest;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
+import com.slack.api.model.User;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
@@ -23,6 +28,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 
 import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,6 +91,7 @@ public class LiftbotApp {
     }
 
     private List<LayoutBlock> createHomeLanding(String userId) {
+        LOGGER.info(userId);
         List<LayoutBlock> blocks = new ArrayList<>();
 
         SectionBlock sectionBlock = SectionBlock.builder()
@@ -141,25 +148,37 @@ public class LiftbotApp {
         });
     }
 
+    private User getUserWithId(ActionContext context, String userId) {
+        try {
+            return context.client().usersInfo(UsersInfoRequest.builder()
+                    .user(userId)
+                    .token(context.getBotToken()).build()).getUser();
+        } catch (SlackApiException | IOException ex) {
+            LOGGER.error("Exception while retrieving user info for id: {}",userId, ex);
+        }
+        return null;
+    }
+
+    private String getSelectedUserIdFromRequest(BlockActionRequest request) {
+        return request.getPayload().getView().getState()
+                .getValues().values().stream()
+                .filter(value -> value.containsKey("selected_user")).findFirst().get()
+                .get("selected_user").getSelectedUser();
+    }
+
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
             BlockActionPayload.User user = request.getPayload().getUser();
-            LOGGER.info("user using the app: {}", user.getUsername());
+            LOGGER.debug("user using the app: {}", user.getUsername());
 
-            ViewState viewState = request.getPayload().getView().getState();
-            LOGGER.info("viewState.getValues(): {}",viewState.getValues());//.get("selected_user").getSelectedUser());
-            Map<String, ViewState.Value> valueMap = viewState.getValues().values()
-                    .stream()
-                    .filter(value -> value.containsKey("selected_user")).findFirst().get();
-            LOGGER.info("selected user id: {}",valueMap.get("selected_user").getSelectedUser());
+            User selectedUser = getUserWithId(context, getSelectedUserIdFromRequest(request));
+            LOGGER.debug("selected user: {}",selectedUser.getRealName());
 
             View viewRecordsView = View.builder()
                     .type("home")
-                    .blocks(createAllRecordsView(valueMap.get("selected_user").getSelectedUser()))
+                    .blocks(createAllRecordsView(selectedUser))
                     .build();
-
-            LOGGER.info(viewRecordsView.toString());
 
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
                     .view(viewRecordsView)
@@ -171,23 +190,31 @@ public class LiftbotApp {
         });
     }
 
+    private Exercise getRecordFromPayload(BlockActionPayload payload) {
+        Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
+        Exercise record = new Exercise();
+        record.setUserid(vsValues.get("user_selection").get("users_select-action").getSelectedUser());
+        record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
+        record.setEquipment(vsValues.get("equipment_needed_input").get("plain_text_input-action").getValue());
+        record.setSets(vsValues.get("sets_input").get("plain_text_input-action").getValue());
+        record.setReps(vsValues.get("reps_input").get("plain_text_input-action").getValue());
+        record.setWeight(vsValues.get("weight_input").get("plain_text_input-action").getValue());
+        return record;
+    }
+
     private void initSaveAction(App liftbotApp) {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
             String userId = request.getPayload().getUser().getId();
-            ViewState viewState = request.getPayload().getView().getState();
-            Exercise exerciseRecord = new Exercise();
-            exerciseRecord.setUserid(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser());
-            exerciseRecord.setName(viewState.getValues().get("exercise_name_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setEquipment(viewState.getValues().get("equipment_needed_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setSets(viewState.getValues().get("sets_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setReps(viewState.getValues().get("reps_input").get("plain_text_input-action").getValue());
-            exerciseRecord.setWeight(viewState.getValues().get("weight_input").get("plain_text_input-action").getValue());
-            LOGGER.info("saving record to database: {}",exerciseRecord);
-            repo.save(exerciseRecord);
+
+            Exercise record = getRecordFromPayload(request.getPayload());
+            LOGGER.debug("saving record to db: {}",record);
+            repo.save(record);
+
+            User selectedUser = getUserWithId(context,record.getUserid());
 
             View savedRecordView = View.builder()
                     .type("home")
-                    .blocks(createAllRecordsView(exerciseRecord.getUserid()))
+                    .blocks(createAllRecordsView(selectedUser))
                     .build();
 
             LOGGER.info(savedRecordView.toString());
@@ -202,13 +229,14 @@ public class LiftbotApp {
         });
     }
 
-    private List<LayoutBlock> createAllRecordsView(String userId) {
-        List<Exercise> allRecords = repo.getAllExercisesForUser(userId);
+    private List<LayoutBlock> createAllRecordsView(User user) {
+
+        List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
         List<LayoutBlock> blocks = new ArrayList<>();
 
         //build title
         HeaderBlock title = HeaderBlock.builder()
-                .text(new PlainTextObject(userId,true)).build();
+                .text(new PlainTextObject(user.getRealName(),true)).build();
         blocks.add(title);
 
         for(Exercise record : allRecords) {
