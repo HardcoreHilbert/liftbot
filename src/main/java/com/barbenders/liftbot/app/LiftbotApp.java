@@ -149,22 +149,17 @@ public class LiftbotApp {
                     .filter(value -> value.containsKey("selected_user")).findFirst().get().toString();
             LOGGER.info("selected user id: {}",selectedUserId);
 
+            View viewRecordsView = View.builder()
+                    .type("home")
+                    .blocks(createAllRecordsView(selectedUserId))
+                    .build();
 
-            try {
-                View viewRecordsView = View.builder()
-                        .type("home")
-                        .blocks(createAllRecordsView(selectedUserId))
-                        .build();
-
-                ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .view(viewRecordsView)
-                        .token(System.getenv("SLACK_BOT_TOKEN"))
-                        .userId(userId)
-                        .build();
-                context.client().viewsPublish(addView);
-            } catch (Exception e) {
-                LOGGER.error("Exception: ", e);
-            }
+            ViewsPublishRequest recordView = ViewsPublishRequest.builder()
+                    .view(viewRecordsView)
+                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .userId(userId)
+                    .build();
+            context.client().viewsPublish(recordView);
             return context.ack();
         });
     }
