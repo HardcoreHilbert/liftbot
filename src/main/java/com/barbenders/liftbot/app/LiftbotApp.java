@@ -25,6 +25,7 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -147,12 +148,14 @@ public class LiftbotApp {
 
             ViewState viewState = request.getPayload().getView().getState();
             LOGGER.info("viewState.getValues(): {}",viewState.getValues());//.get("selected_user").getSelectedUser());
-            String selectedUserId = viewState.getValues().get(0).get("selected_user").getSelectedUser();
-            LOGGER.info("selected user id: {}",selectedUserId);
+            Map<String, ViewState.Value> valueMap = viewState.getValues().values()
+                    .stream()
+                    .filter(value -> value.containsKey("selected_user")).findFirst().get();
+            LOGGER.info("selected user id: {}",valueMap.get("selected_user").getSelectedUser());
 
             View viewRecordsView = View.builder()
                     .type("home")
-                    .blocks(createAllRecordsView(selectedUserId))
+                    .blocks(createAllRecordsView(valueMap.get("selected_user").getSelectedUser()))
                     .build();
 
             LOGGER.info(viewRecordsView.toString());
