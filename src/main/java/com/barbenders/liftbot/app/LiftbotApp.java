@@ -54,8 +54,9 @@ public class LiftbotApp {
 
 
         initHomeView(liftbotApp);
-        //initAddExerciseHomeView(liftbotApp);
-        //initSaveAction(liftbotApp);
+        initAddRecordAction(liftbotApp);
+        initViewRecordsAction(liftbotApp);
+        initSaveAction(liftbotApp);
 
         return liftbotApp;
     }
@@ -115,10 +116,10 @@ public class LiftbotApp {
         return blocks;
     }
 
-    private void initAddExerciseHomeView(App liftbotApp) {
+    private void initAddRecordAction(App liftbotApp) {
         LOGGER.info("initializing LiftBot view Add Exercise");
-        liftbotApp.event(AppHomeOpenedEvent.class, (request, context) -> {
-            String userId = request.getEvent().getUser();
+        liftbotApp.blockAction("add_record", (request, context) -> {
+            String userId = request.getPayload().getUser().getId();
             LOGGER.info("user: {}", userId);
             String viewString = new BufferedReader(new InputStreamReader(
                     new ClassPathResource("add_exercise.json").getInputStream()))
@@ -127,6 +128,34 @@ public class LiftbotApp {
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
                         .viewAsString(viewString)
+                        .token(System.getenv("SLACK_BOT_TOKEN"))
+                        .userId(userId)
+                        .build();
+                context.client().viewsPublish(addView);
+            } catch (Exception e) {
+                LOGGER.error("Exception: ", e);
+            }
+            return context.ack();
+        });
+    }
+
+    private void initViewRecordsAction(App liftbotApp) {
+        LOGGER.info("initializing LiftBot view Add Exercise");
+        liftbotApp.blockAction("add_record", (request, context) -> {
+            String userId = request.getPayload().getUser().getId();
+            LOGGER.info("user: {}", userId);
+            String viewString = new BufferedReader(new InputStreamReader(
+                    new ClassPathResource("add_exercise.json").getInputStream()))
+                    .lines().collect(Collectors.joining());
+            LOGGER.debug("viewString: {}", viewString);
+            try {
+                View viewRecordsView = View.builder()
+                        .type("home")
+                        .blocks(createAllRecordsView(userId))
+                        .build();
+
+                ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                        .view(viewRecordsView)
                         .token(System.getenv("SLACK_BOT_TOKEN"))
                         .userId(userId)
                         .build();
@@ -167,7 +196,7 @@ public class LiftbotApp {
         });
     }
 
-    private List<LayoutBlock> createTableBlock(String userId) {
+    private List<LayoutBlock> createAllRecordsView(String userId) {
         List<Exercise> allRecords = repo.getAllExercisesForUser(userId);
         List<LayoutBlock> blocks = new ArrayList<>();
 
