@@ -2,6 +2,7 @@ package com.barbenders.liftbot.app;
 
 import com.barbenders.liftbot.model.Exercise;
 import com.barbenders.liftbot.repo.ExerciseRepository;
+import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
@@ -143,8 +144,8 @@ public class LiftbotApp {
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
-            String userId = request.getPayload().getUser().getName();
-            LOGGER.info("user using the app: {}", userId);
+            BlockActionPayload.User user = request.getPayload().getUser();
+            LOGGER.info("user using the app: {}", user.getUsername());
 
             ViewState viewState = request.getPayload().getView().getState();
             LOGGER.info("viewState.getValues(): {}",viewState.getValues());//.get("selected_user").getSelectedUser());
@@ -163,7 +164,7 @@ public class LiftbotApp {
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
                     .view(viewRecordsView)
                     .token(System.getenv("SLACK_BOT_TOKEN"))
-                    .userId(userId)
+                    .userId(user.getId())
                     .build();
             context.client().viewsPublish(recordView);
             return context.ack();
