@@ -146,24 +146,25 @@ public class LiftbotApp {
             LOGGER.info("user using the app: {}", userId);
 
             ViewState viewState = request.getPayload().getView().getState();
-            LOGGER.info("selected user: {}",viewState.getValues().get("pap"));//.get("selected_user").getSelectedUser());
+            LOGGER.info("viewState.getValues(): {}",viewState.getValues());//.get("selected_user").getSelectedUser());
+            LOGGER.info("viewState.getValues().values(): {}",viewState.getValues().values());
 
 
-            try {
-                View viewRecordsView = View.builder()
-                        .type("home")
-                        .blocks(createAllRecordsView(viewState.getValues().get("pap").get("selected_user").getSelectedUser()))
-                        .build();
-
-                ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .view(viewRecordsView)
-                        .token(System.getenv("SLACK_BOT_TOKEN"))
-                        .userId(userId)
-                        .build();
-                context.client().viewsPublish(addView);
-            } catch (Exception e) {
-                LOGGER.error("Exception: ", e);
-            }
+//            try {
+//                View viewRecordsView = View.builder()
+//                        .type("home")
+//                        .blocks(createAllRecordsView(viewState.getValues().get("pap").get("selected_user").getSelectedUser()))
+//                        .build();
+//
+//                ViewsPublishRequest addView = ViewsPublishRequest.builder()
+//                        .view(viewRecordsView)
+//                        .token(System.getenv("SLACK_BOT_TOKEN"))
+//                        .userId(userId)
+//                        .build();
+//                context.client().viewsPublish(addView);
+//            } catch (Exception e) {
+//                LOGGER.error("Exception: ", e);
+//            }
             return context.ack();
         });
     }
