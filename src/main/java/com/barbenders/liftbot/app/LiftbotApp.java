@@ -146,7 +146,7 @@ public class LiftbotApp {
             LOGGER.info("user using the app: {}", userId);
 
             ViewState viewState = request.getPayload().getView().getState();
-            LOGGER.info("selected user: {}",viewState.getValues().get("pap").get("selected_user").getSelectedUser());
+            LOGGER.info("selected user: {}",viewState.getValues().get("pap"));//.get("selected_user").getSelectedUser());
 
 
             try {
