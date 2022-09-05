@@ -143,11 +143,12 @@ public class LiftbotApp {
         LOGGER.info("initializing LiftBot view Add Exercise");
         liftbotApp.blockAction("view_records", (request, context) -> {
             String userId = request.getPayload().getUser().getName();
-            LOGGER.info("user: {}", userId);
+            LOGGER.info("user using the app: {}", userId);
+
+            ViewState viewState = request.getPayload().getView().getState();
+            LOGGER.info(viewState.toString());
 
             try {
-                ViewState viewState = request.getPayload().getView().getState();
-
                 View viewRecordsView = View.builder()
                         .type("home")
                         .blocks(createAllRecordsView(viewState.getValues().get("user_selection").get("selected_user").getSelectedUser()))
