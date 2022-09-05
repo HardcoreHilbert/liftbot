@@ -141,7 +141,7 @@ public class LiftbotApp {
 
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing LiftBot view Add Exercise");
-        liftbotApp.blockAction("add_record", (request, context) -> {
+        liftbotApp.blockAction("view_records", (request, context) -> {
             String userId = request.getPayload().getUser().getId();
             LOGGER.info("user: {}", userId);
             String viewString = new BufferedReader(new InputStreamReader(
