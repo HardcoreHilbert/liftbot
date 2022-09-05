@@ -8,7 +8,6 @@ import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
-import com.slack.api.model.block.composition.TextObject;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.UsersSelectElement;
@@ -210,23 +209,13 @@ public class LiftbotApp {
 
         for(Exercise record : allRecords) {
             blocks.add(new DividerBlock());
-            blocks.add(SectionBlock.builder().fields(new ArrayList<TextObject>(){
-                {
-                    add(MarkdownTextObject.builder().text(
-                            new StringBuilder()
-                                    .append("*").append(record.getName()).append("*")
-                                    .append(" (").append(record.getEquipment()).append(")")
-                                    .toString()).build()
-                    );
-                    add(MarkdownTextObject.builder().text(
-                            new StringBuilder()
-                                    .append(record.getSets()).append(" x ")
-                                    .append(record.getReps()).append(" x ")
-                                    .append(record.getWeight()).append("lb")
-                                    .toString()).build()
-                    );
-                }
-            }).build());
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder().text("*"+record.getName()+"*").build()).build()
+            );
+            blocks.add(SectionBlock.builder()
+                    .text(MarkdownTextObject.builder().text("("+record.getEquipment()+") : "
+                            +record.getSets()+" x "+record.getReps()+" x "+record.getWeight()+"lb").build()).build()
+            );
         }
         return blocks;
     }
