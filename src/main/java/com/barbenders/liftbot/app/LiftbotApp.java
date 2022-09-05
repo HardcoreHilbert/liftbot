@@ -142,16 +142,18 @@ public class LiftbotApp {
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing LiftBot view Add Exercise");
         liftbotApp.blockAction("view_records", (request, context) -> {
-            String userId = request.getPayload().getUser().getId();
+            String userId = request.getPayload().getUser().getName();
             LOGGER.info("user: {}", userId);
             String viewString = new BufferedReader(new InputStreamReader(
                     new ClassPathResource("add_exercise.json").getInputStream()))
                     .lines().collect(Collectors.joining());
             LOGGER.debug("viewString: {}", viewString);
             try {
+                ViewState viewState = request.getPayload().getView().getState();
+
                 View viewRecordsView = View.builder()
                         .type("home")
-                        .blocks(createAllRecordsView(userId))
+                        .blocks(createAllRecordsView(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser()))
                         .build();
 
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
@@ -206,19 +208,22 @@ public class LiftbotApp {
         blocks.add(title);
 
         for(Exercise record : allRecords) {
+            blocks.add(new DividerBlock());
             blocks.add(SectionBlock.builder().fields(new ArrayList<TextObject>(){
                 {
                     add(MarkdownTextObject.builder().text(
-                            new StringBuilder("*Exercise Name: *")
+                            new StringBuilder()
+                                    .append("*Exercise Name:*")
                                     .append(record.getName())
-                                    .append("\n*Equipment Needed:* ")
+                                    .append("\n*Equipment Needed:*\n")
                                     .append(record.getEquipment())
                                     .toString()).build()
                     );
                     add(MarkdownTextObject.builder().text(
-                            new StringBuilder("*Sets: *")
+                            new StringBuilder()
+                                    .append("*Sets:*   ")
                                     .append(record.getSets())
-                                    .append("\n*Reps:* ")
+                                    .append("\n*Reps:*   ")
                                     .append(record.getReps())
                                     .append("\n*Weight:* ")
                                     .append(record.getWeight())
