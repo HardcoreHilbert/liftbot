@@ -114,7 +114,7 @@ public class LiftbotApp {
     }
 
     private void initAddRecordAction(App liftbotApp) {
-        LOGGER.info("initializing LiftBot view Add Exercise");
+        LOGGER.info("initializing Add Record action");
         liftbotApp.blockAction("add_record", (request, context) -> {
 
             String userId = request.getPayload().getUser().getId();
@@ -140,16 +140,14 @@ public class LiftbotApp {
     }
 
     private void initViewRecordsAction(App liftbotApp) {
-        LOGGER.info("initializing LiftBot view Add Exercise");
+        LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
             String userId = request.getPayload().getUser().getName();
             LOGGER.info("user using the app: {}", userId);
 
             ViewState viewState = request.getPayload().getView().getState();
             LOGGER.info("viewState.getValues(): {}",viewState.getValues());//.get("selected_user").getSelectedUser());
-            String selectedUserId = viewState.getValues().values()
-                    .stream()
-                    .filter(value -> value.containsKey("selected_user")).findFirst().get().toString();
+            String selectedUserId = viewState.getValues().get(0).get("selected_user").getSelectedUser();
             LOGGER.info("selected user id: {}",selectedUserId);
 
             View viewRecordsView = View.builder()
