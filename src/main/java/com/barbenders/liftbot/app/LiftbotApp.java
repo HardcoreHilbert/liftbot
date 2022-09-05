@@ -203,27 +203,29 @@ public class LiftbotApp {
         //build title
         HeaderBlock title = HeaderBlock.builder()
                 .text(new PlainTextObject(userId,true)).build();
-        blocks.add(0,title);
+        blocks.add(title);
 
-        List<TextObject> fields = new ArrayList<>();
-        fields.add(MarkdownTextObject.builder().text("*Exercise Name*").build());
-        fields.add(MarkdownTextObject.builder().text("*Equipment Needed*").build());
-        fields.add(MarkdownTextObject.builder().text("*Sets*").build());
-        fields.add(MarkdownTextObject.builder().text("*Reps*").build());
-        fields.add(MarkdownTextObject.builder().text("*Weight*").build());
-        SectionBlock header = SectionBlock.builder().fields(fields).build();
-        blocks.add(1,header);
-
-        int count = 2;
         for(Exercise record : allRecords) {
-            List<TextObject> recordLine = new ArrayList<>();
-            recordLine.add(MarkdownTextObject.builder().text(record.getName()).build());
-            recordLine.add(MarkdownTextObject.builder().text(record.getEquipment()).build());
-            recordLine.add(MarkdownTextObject.builder().text(record.getSets()).build());
-            recordLine.add(MarkdownTextObject.builder().text(record.getReps()).build());
-            recordLine.add(MarkdownTextObject.builder().text(record.getWeight()).build());
-            blocks.add(count,SectionBlock.builder().fields(recordLine).build());
-            count++;
+            blocks.add(SectionBlock.builder().fields(new ArrayList<TextObject>(){
+                {
+                    add(MarkdownTextObject.builder().text(
+                            new StringBuilder("*Exercise Name: *")
+                                    .append(record.getName())
+                                    .append("\n*Equipment Needed:* ")
+                                    .append(record.getEquipment())
+                                    .toString()).build()
+                    );
+                    add(MarkdownTextObject.builder().text(
+                            new StringBuilder("*Sets: *")
+                                    .append(record.getSets())
+                                    .append("\n*Reps:* ")
+                                    .append(record.getReps())
+                                    .append("\n*Weight:* ")
+                                    .append(record.getWeight())
+                                    .toString()).build()
+                    );
+                }
+            }).build());
         }
         return blocks;
     }
