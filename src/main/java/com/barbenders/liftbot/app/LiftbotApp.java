@@ -116,12 +116,15 @@ public class LiftbotApp {
     private void initAddRecordAction(App liftbotApp) {
         LOGGER.info("initializing LiftBot view Add Exercise");
         liftbotApp.blockAction("add_record", (request, context) -> {
+
             String userId = request.getPayload().getUser().getId();
             LOGGER.info("user: {}", userId);
+
             String viewString = new BufferedReader(new InputStreamReader(
                     new ClassPathResource("add_exercise.json").getInputStream()))
                     .lines().collect(Collectors.joining());
             LOGGER.debug("viewString: {}", viewString);
+
             try {
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
                         .viewAsString(viewString)
@@ -154,6 +157,8 @@ public class LiftbotApp {
                     .blocks(createAllRecordsView(selectedUserId))
                     .build();
 
+            LOGGER.info(viewRecordsView.toString());
+
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
                     .view(viewRecordsView)
                     .token(System.getenv("SLACK_BOT_TOKEN"))
@@ -182,6 +187,8 @@ public class LiftbotApp {
                     .type("home")
                     .blocks(createAllRecordsView(exerciseRecord.getUserid()))
                     .build();
+
+            LOGGER.info(savedRecordView.toString());
 
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)
