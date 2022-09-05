@@ -146,12 +146,13 @@ public class LiftbotApp {
             LOGGER.info("user using the app: {}", userId);
 
             ViewState viewState = request.getPayload().getView().getState();
-            LOGGER.info(viewState.toString());
+            LOGGER.info("selected user: {}",viewState.getValues().get("pap").get("selected_user").getSelectedUser());
+
 
             try {
                 View viewRecordsView = View.builder()
                         .type("home")
-                        .blocks(createAllRecordsView(viewState.getValues().get("user_selection").get("selected_user").getSelectedUser()))
+                        .blocks(createAllRecordsView(viewState.getValues().get("pap").get("selected_user").getSelectedUser()))
                         .build();
 
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
