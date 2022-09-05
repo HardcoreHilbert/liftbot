@@ -214,20 +214,15 @@ public class LiftbotApp {
                 {
                     add(MarkdownTextObject.builder().text(
                             new StringBuilder()
-                                    .append("*Exercise Name:*")
-                                    .append(record.getName())
-                                    .append("\n*Equipment Needed:*\n")
-                                    .append(record.getEquipment())
+                                    .append("*").append(record.getName()).append("*")
+                                    .append(" (").append(record.getEquipment()).append(")")
                                     .toString()).build()
                     );
                     add(MarkdownTextObject.builder().text(
                             new StringBuilder()
-                                    .append("*Sets:*   ")
-                                    .append(record.getSets())
-                                    .append("\n*Reps:*   ")
-                                    .append(record.getReps())
-                                    .append("\n*Weight:* ")
-                                    .append(record.getWeight())
+                                    .append(record.getSets()).append(" x ")
+                                    .append(record.getReps()).append(" x ")
+                                    .append(record.getWeight()).append("lb")
                                     .toString()).build()
                     );
                 }
