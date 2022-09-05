@@ -5,7 +5,7 @@ import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.bolt.context.builtin.ActionContext;
+import com.slack.api.bolt.context.Context;
 import com.slack.api.bolt.request.builtin.BlockActionRequest;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.users.UsersInfoRequest;
@@ -59,6 +59,7 @@ public class LiftbotApp {
 
 
         initHomeView(liftbotApp);
+        initUserSelectionAction(liftbotApp);
         initAddRecordAction(liftbotApp);
         initViewRecordsAction(liftbotApp);
         initSaveAction(liftbotApp);
@@ -69,37 +70,47 @@ public class LiftbotApp {
     private void initHomeView(App liftBot) {
         LOGGER.info("initializing home screen view");
         liftBot.event(AppHomeOpenedEvent.class, (request, context) -> {
-            String userId = request.getEvent().getUser();
-            LOGGER.info("user that opened home view: {}", userId);
-            try {
-                View homeLanding = View.builder()
-                        .type("home")
-                        .blocks(createHomeLanding(userId))
-                        .build();
+            User currentUser = getUserWithId(context, request.getEvent().getUser());
+            LOGGER.info("user that opened home view: {}", currentUser.getName());
 
-                ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .view(homeLanding)
-                        .token(System.getenv("SLACK_BOT_TOKEN"))
-                        .userId(userId)
-                        .build();
-                context.client().viewsPublish(addView);
-            } catch (Exception e) {
-                LOGGER.error("Exception: ", e);
-            }
+            View homeLanding = View.builder()
+                    .type("home")
+                    .blocks(createHomeLanding(currentUser.isAdmin()))
+                    .build();
+            ViewsPublishRequest homeView = ViewsPublishRequest.builder()
+                    .view(homeLanding)
+                    .token(context.getBotToken())
+                    .userId(currentUser.getId())
+                    .build();
+            context.client().viewsPublish(homeView);
+
             return context.ack();
         });
     }
 
-    private List<LayoutBlock> createHomeLanding(String userId) {
-        LOGGER.info(userId);
-        List<LayoutBlock> blocks = new ArrayList<>();
+    private List<LayoutBlock> createHomeLanding(boolean isAdmin) {
+        LOGGER.info("creating home landing layout");
 
-        SectionBlock sectionBlock = SectionBlock.builder()
-                .text(MarkdownTextObject.builder().text("choose user").build())
-                .accessory(UsersSelectElement.builder().actionId("selected_user").build())
-                .build();
+        if(isAdmin) {
+            return new ArrayList<LayoutBlock>() {
+                {
+                    add(SectionBlock.builder()
+                            .text(MarkdownTextObject.builder().text("Whose fate are we controlling today?").build())
+                            .accessory(UsersSelectElement.builder().actionId("selected_user").build())
+                            .build());
+                }
+            };
+        } else {
+            return new ArrayList<LayoutBlock>() {
+                {
+                    add(createActionChoiceLayout());
+                }
+            };
+        }
+    }
 
-        ActionsBlock actionsBlock = ActionsBlock.builder()
+    private ActionsBlock createActionChoiceLayout() {
+        return ActionsBlock.builder()
                 .elements(new ArrayList<BlockElement>(){
                     {
                         add(ButtonElement.builder()
@@ -113,13 +124,44 @@ public class LiftbotApp {
                     }
                 })
                 .build();
+    }
 
-        blocks.add(new DividerBlock());
-        blocks.add(sectionBlock);
-        blocks.add(new DividerBlock());
-        blocks.add(actionsBlock);
+    private void initUserSelectionAction(App liftBot) {
+        LOGGER.info("initializing User Selection action");
+        liftBot.blockAction("selected_user", (request, context) -> {
 
-        return blocks;
+            BlockActionPayload.User currentUser = request.getPayload().getUser();
+            LOGGER.info("current user: {}", currentUser.getName());
+
+            User selectedUser = getUserWithId(context,getSelectedUserIdFromRequest(request));
+
+            View actionChoiceView = View.builder()
+                    .type("home")
+                    .blocks(createAdminChoiceActionView(selectedUser))
+                    .build();
+
+            ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                    .view(actionChoiceView)
+                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .userId(currentUser.getId())
+                    .build();
+            context.client().viewsPublish(addView);
+
+            return context.ack();
+        });
+    }
+
+    private ArrayList<LayoutBlock> createAdminChoiceActionView(User selectedUser) {
+        return new ArrayList<LayoutBlock>(){
+            {
+                add(HeaderBlock.builder().blockId("selected_user_name")
+                        .text(new PlainTextObject(selectedUser.getName(),true)).build());
+                add(SectionBlock.builder().blockId("selected_user_id")
+                        .text(new PlainTextObject(selectedUser.getId(), false)).build());
+                add(new DividerBlock());
+                add(createActionChoiceLayout());
+            }
+        };
     }
 
     private void initAddRecordAction(App liftbotApp) {
@@ -148,7 +190,7 @@ public class LiftbotApp {
         });
     }
 
-    private User getUserWithId(ActionContext context, String userId) {
+    private User getUserWithId(Context context, String userId) {
         try {
             return context.client().usersInfo(UsersInfoRequest.builder()
                     .user(userId)
