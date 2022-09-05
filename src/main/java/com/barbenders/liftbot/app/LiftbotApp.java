@@ -183,7 +183,7 @@ public class LiftbotApp {
 
             View savedRecordView = View.builder()
                     .type("home")
-                    .blocks(createTableBlock(exerciseRecord.getUserid()))
+                    .blocks(createAllRecordsView(exerciseRecord.getUserid()))
                     .build();
 
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
