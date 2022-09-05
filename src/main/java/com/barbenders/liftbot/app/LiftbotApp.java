@@ -33,8 +33,6 @@ public class LiftbotApp {
 
     static Logger LOGGER = LoggerFactory.getLogger(LiftbotApp.class);
 
-    private static final String OPEN = "&lt;";
-    private static final String CLOSE = "&gt;";
     @Autowired
     ExerciseRepository repo;
 
@@ -150,7 +148,7 @@ public class LiftbotApp {
             String selectedUserId = viewState.getValues().values()
                     .stream()
                     .filter(value -> value.containsKey("selected_user")).findFirst().get().toString();
-            LOGGER.info("viewState.getValues().values(): {}",viewState.getValues().values().stream().);
+            LOGGER.info("selected user id: {}",selectedUserId);
 
 
             try {
