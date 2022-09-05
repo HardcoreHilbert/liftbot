@@ -144,16 +144,13 @@ public class LiftbotApp {
         liftbotApp.blockAction("view_records", (request, context) -> {
             String userId = request.getPayload().getUser().getName();
             LOGGER.info("user: {}", userId);
-            String viewString = new BufferedReader(new InputStreamReader(
-                    new ClassPathResource("add_exercise.json").getInputStream()))
-                    .lines().collect(Collectors.joining());
-            LOGGER.debug("viewString: {}", viewString);
+
             try {
                 ViewState viewState = request.getPayload().getView().getState();
 
                 View viewRecordsView = View.builder()
                         .type("home")
-                        .blocks(createAllRecordsView(viewState.getValues().get("user_selection").get("users_select-action").getSelectedUser()))
+                        .blocks(createAllRecordsView(viewState.getValues().get("user_selection").get("selected_user").getSelectedUser()))
                         .build();
 
                 ViewsPublishRequest addView = ViewsPublishRequest.builder()
