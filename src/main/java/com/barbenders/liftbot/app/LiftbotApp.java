@@ -173,6 +173,7 @@ public class LiftbotApp {
 
             View addRecordView = View.builder()
                     .type("home")
+                    .privateMetadata("SU:"+selectedUser)
                     .blocks(createAddRecordView(selectedUser))
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
@@ -270,7 +271,7 @@ public class LiftbotApp {
 
     private Exercise getRecordFromPayload(BlockActionPayload payload) {
         Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
-        LOGGER.debug("vsValues: " + payload.getView().getState());
+        LOGGER.debug("vsValues: " + payload.getView().getPrivateMetadata());
         Exercise record = new Exercise();
         record.setUserid(vsValues.get("selected_user_id").get("users_select-action").getSelectedUser());
         record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
