@@ -2,7 +2,6 @@ package com.barbenders.liftbot.app;
 
 import com.barbenders.liftbot.model.Exercise;
 import com.barbenders.liftbot.repo.ExerciseRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
@@ -174,7 +173,7 @@ public class LiftbotApp {
 
             View addRecordView = View.builder()
                     .type("home")
-                    .privateMetadata(new ObjectMapper().writeValueAsString(selectedUser))
+                    .privateMetadata(selectedUser.getId())
                     .blocks(createAddRecordView(selectedUser))
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
@@ -270,10 +269,9 @@ public class LiftbotApp {
 
     private Exercise getRecordFromPayload(BlockActionPayload payload) {
         Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
-        User user = new ObjectMapper().convertValue(payload.getView().getPrivateMetadata(), User.class);
-        LOGGER.debug("vsValues: " + user.getId());
+        LOGGER.debug("vsValues: " + payload.getView().getPrivateMetadata());
         Exercise record = new Exercise();
-        record.setUserid(vsValues.get("selected_user_id").get("users_select-action").getSelectedUser());
+        record.setUserid(payload.getView().getPrivateMetadata());
         record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
         record.setEquipment(vsValues.get("equipment_needed_input").get("plain_text_input-action").getValue());
         record.setSets(vsValues.get("sets_input").get("plain_text_input-action").getValue());
