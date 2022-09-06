@@ -168,11 +168,11 @@ public class LiftbotApp {
             String userId = request.getPayload().getUser().getId();
             LOGGER.info("user: {}", userId);
 
-            User selectedUser = getUserWithId(context,getSelectedUserIdFromRequest(request));
+            User selectedUser = getSelectedUser(context, request);
 
             View addRecordView = View.builder()
                     .type("home")
-                    .blocks(createAdminChoiceActionView(selectedUser))
+                    .blocks(createAddRecordView(selectedUser))
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
                     .view(addRecordView)
