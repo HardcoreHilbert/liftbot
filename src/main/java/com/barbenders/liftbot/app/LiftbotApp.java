@@ -272,11 +272,11 @@ public class LiftbotApp {
         LOGGER.debug("vsValues: " + vsValues);
         Exercise record = new Exercise();
         record.setUserid(payload.getView().getPrivateMetadata());
-        record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
-        record.setEquipment(vsValues.get("equipment_needed_input").get("plain_text_input-action").getValue());
-        record.setSets(vsValues.get("sets_input").get("plain_text_input-action").getValue());
-        record.setReps(vsValues.get("reps_input").get("plain_text_input-action").getValue());
-        record.setWeight(vsValues.get("weight_input").get("plain_text_input-action").getValue());
+        record.setName(new ArrayList<>(vsValues.get("exercise_name_input").values()).get(0).getValue());
+        record.setEquipment(new ArrayList<>(vsValues.get("equipment_needed_input").values()).get(0).getValue());
+        record.setSets(new ArrayList<>(vsValues.get("sets_input").values()).get(0).getValue());
+        record.setReps(new ArrayList<>(vsValues.get("reps_input").values()).get(0).getValue());
+        record.setWeight(new ArrayList<>(vsValues.get("weight_input").values()).get(0).getValue());
         return record;
     }
 
