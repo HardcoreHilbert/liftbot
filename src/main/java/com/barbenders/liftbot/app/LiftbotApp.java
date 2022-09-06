@@ -176,7 +176,7 @@ public class LiftbotApp {
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
                     .view(addRecordView)
-                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .token(context.getBotToken())
                     .userId(userId)
                     .build();
             context.client().viewsPublish(addView);
@@ -220,7 +220,7 @@ public class LiftbotApp {
 
             View viewRecordsView = View.builder()
                     .type("home")
-                    .blocks(createAddRecordView(selectedUser))
+                    .blocks(createAllRecordsView(selectedUser))
                     .build();
 
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
