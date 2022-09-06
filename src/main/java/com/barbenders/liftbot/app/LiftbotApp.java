@@ -25,16 +25,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.core.io.ClassPathResource;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
-import java.util.stream.Collectors;
 
 @Configuration
 public class LiftbotApp {
@@ -143,7 +139,7 @@ public class LiftbotApp {
 
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
                     .view(actionChoiceView)
-                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .token(context.getBotToken())
                     .userId(currentUser.getId())
                     .build();
             context.client().viewsPublish(addView);
@@ -172,21 +168,19 @@ public class LiftbotApp {
             String userId = request.getPayload().getUser().getId();
             LOGGER.info("user: {}", userId);
 
-            String viewString = new BufferedReader(new InputStreamReader(
-                    new ClassPathResource("add_exercise.json").getInputStream()))
-                    .lines().collect(Collectors.joining());
-            LOGGER.debug("viewString: {}", viewString);
+            User selectedUser = getUserWithId(context,getSelectedUserIdFromRequest(request));
 
-            try {
-                ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                        .viewAsString(viewString)
-                        .token(System.getenv("SLACK_BOT_TOKEN"))
-                        .userId(userId)
-                        .build();
-                context.client().viewsPublish(addView);
-            } catch (Exception e) {
-                LOGGER.error("Exception: ", e);
-            }
+            View addRecordView = View.builder()
+                    .type("home")
+                    .blocks(createAdminChoiceActionView(selectedUser))
+                    .build();
+            ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                    .view(addRecordView)
+                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .userId(userId)
+                    .build();
+            context.client().viewsPublish(addView);
+
             return context.ack();
         });
     }
@@ -209,33 +203,63 @@ public class LiftbotApp {
                 .get("selected_user").getSelectedUser();
     }
 
+    private User getSelectedUser(Context context, BlockActionRequest request) {
+        try {
+            return getUserWithId(context, getSelectedUserIdFromRequest(request));
+        } catch (NoSuchElementException nse) {
+            return getUserWithId(context, request.getPayload().getUser().getId());
+        }
+    }
+
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
-            BlockActionPayload.User user = request.getPayload().getUser();
-            LOGGER.debug("user using the app: {}", user.getUsername());
 
-            User selectedUser;
-            try {
-                selectedUser = getUserWithId(context, getSelectedUserIdFromRequest(request));
-            } catch (NoSuchElementException nse) {
-                selectedUser = getUserWithId(context, user.getId());
-            }
+            User selectedUser = getSelectedUser(context, request);
             LOGGER.debug("selected user: {}",selectedUser.getRealName());
 
             View viewRecordsView = View.builder()
                     .type("home")
-                    .blocks(createAllRecordsView(selectedUser))
+                    .blocks(createAddRecordView(selectedUser))
                     .build();
 
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
                     .view(viewRecordsView)
-                    .token(System.getenv("SLACK_BOT_TOKEN"))
-                    .userId(user.getId())
+                    .token(context.getBotToken())
+                    .userId(request.getPayload().getUser().getId())
                     .build();
             context.client().viewsPublish(recordView);
             return context.ack();
         });
+    }
+
+    private List<LayoutBlock> createAddRecordView(User user) {
+
+        List<LayoutBlock> blocks = new ArrayList<>();
+
+        //build title
+        blocks.add(HeaderBlock.builder().blockId("selected_user_name")
+                .text(new PlainTextObject(user.getName(),true)).build());
+        blocks.add(SectionBlock.builder().blockId("selected_user_id")
+                .text(new PlainTextObject(user.getId(), false)).build());
+        blocks.add(InputBlock.builder().blockId("exercise_name_input")
+                .label(new PlainTextObject("Exercise Name",true)).build());
+        blocks.add(InputBlock.builder().blockId("equipment_needed_input")
+                .label(new PlainTextObject("Equipment Needed",true)).build());
+        blocks.add(InputBlock.builder().blockId("sets_input")
+                .label(new PlainTextObject("Sets",true)).build());
+        blocks.add(InputBlock.builder().blockId("reps_input")
+                .label(new PlainTextObject("Reps",true)).build());
+        blocks.add(InputBlock.builder().blockId("weight_input")
+                .label(new PlainTextObject("Weight",true)).build());
+        blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
+            {
+                add(ButtonElement.builder()
+                        .text(new PlainTextObject("Save",true))
+                        .actionId("exercise_save").build());
+            }
+        }).build());
+        return blocks;
     }
 
     private Exercise getRecordFromPayload(BlockActionPayload payload) {
