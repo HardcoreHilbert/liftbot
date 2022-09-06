@@ -2,6 +2,7 @@ package com.barbenders.liftbot.app;
 
 import com.barbenders.liftbot.model.Exercise;
 import com.barbenders.liftbot.repo.ExerciseRepository;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
@@ -173,7 +174,7 @@ public class LiftbotApp {
 
             View addRecordView = View.builder()
                     .type("home")
-                    .privateMetadata("SU:"+selectedUser)
+                    .privateMetadata(new ObjectMapper().writeValueAsString(selectedUser))
                     .blocks(createAddRecordView(selectedUser))
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
@@ -242,8 +243,6 @@ public class LiftbotApp {
         //build title
         blocks.add(HeaderBlock.builder().blockId("selected_user_name")
                 .text(new PlainTextObject(user.getName(),true)).build());
-        blocks.add(SectionBlock.builder().blockId("selected_user_id")
-                .text(new PlainTextObject(user.getId(), false)).build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
@@ -271,7 +270,8 @@ public class LiftbotApp {
 
     private Exercise getRecordFromPayload(BlockActionPayload payload) {
         Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
-        LOGGER.debug("vsValues: " + payload.getView().getPrivateMetadata());
+        User user = new ObjectMapper().convertValue(payload.getView().getPrivateMetadata(), User.class);
+        LOGGER.debug("vsValues: " + user.getId());
         Exercise record = new Exercise();
         record.setUserid(vsValues.get("selected_user_id").get("users_select-action").getSelectedUser());
         record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
@@ -301,7 +301,7 @@ public class LiftbotApp {
 
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)
-                    .token(System.getenv("SLACK_BOT_TOKEN"))
+                    .token(context.getBotToken())
                     .userId(userId)
                     .build();
             context.client().viewsPublish(updateView);
