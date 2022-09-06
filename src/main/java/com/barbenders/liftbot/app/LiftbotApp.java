@@ -16,6 +16,7 @@ import com.slack.api.model.block.composition.MarkdownTextObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
+import com.slack.api.model.block.element.PlainTextInputElement;
 import com.slack.api.model.block.element.UsersSelectElement;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
@@ -243,15 +244,20 @@ public class LiftbotApp {
         blocks.add(SectionBlock.builder().blockId("selected_user_id")
                 .text(new PlainTextObject(user.getId(), false)).build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
-                .label(new PlainTextObject("Exercise Name",true)).build());
+                .label(new PlainTextObject("Exercise Name",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(InputBlock.builder().blockId("equipment_needed_input")
-                .label(new PlainTextObject("Equipment Needed",true)).build());
+                .label(new PlainTextObject("Equipment Needed",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(InputBlock.builder().blockId("sets_input")
-                .label(new PlainTextObject("Sets",true)).build());
+                .label(new PlainTextObject("Sets",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(InputBlock.builder().blockId("reps_input")
-                .label(new PlainTextObject("Reps",true)).build());
+                .label(new PlainTextObject("Reps",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(InputBlock.builder().blockId("weight_input")
-                .label(new PlainTextObject("Weight",true)).build());
+                .label(new PlainTextObject("Weight",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
             {
                 add(ButtonElement.builder()
