@@ -135,6 +135,7 @@ public class LiftbotApp {
 
             View actionChoiceView = View.builder()
                     .type("home")
+                    .privateMetadata(selectedUser.getId())
                     .blocks(createAdminChoiceActionView(selectedUser))
                     .build();
 
@@ -154,8 +155,6 @@ public class LiftbotApp {
             {
                 add(HeaderBlock.builder().blockId("selected_user_name")
                         .text(new PlainTextObject(selectedUser.getName(),true)).build());
-                add(SectionBlock.builder().blockId("selected_user_id")
-                        .text(new PlainTextObject(selectedUser.getId(), false)).build());
                 add(new DividerBlock());
                 add(createActionChoiceLayout());
             }
@@ -167,9 +166,10 @@ public class LiftbotApp {
         liftbotApp.blockAction("add_record", (request, context) -> {
 
             String userId = request.getPayload().getUser().getId();
-            LOGGER.info("user: {}", userId);
+            LOGGER.debug("current user: {}", userId);
 
-            User selectedUser = getSelectedUser(context, request);
+            User selectedUser = getUserWithId(context,request.getPayload().getView().getPrivateMetadata());
+            LOGGER.debug("selected user: {}", selectedUser.getName());
 
             View addRecordView = View.builder()
                     .type("home")
@@ -205,23 +205,16 @@ public class LiftbotApp {
                 .get("selected_user").getSelectedUser();
     }
 
-    private User getSelectedUser(Context context, BlockActionRequest request) {
-        try {
-            return getUserWithId(context, getSelectedUserIdFromRequest(request));
-        } catch (NoSuchElementException nse) {
-            return getUserWithId(context, request.getPayload().getUser().getId());
-        }
-    }
-
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
 
-            User selectedUser = getSelectedUser(context, request);
+            User selectedUser = getUserWithId(context, request.getPayload().getView().getPrivateMetadata());
             LOGGER.debug("selected user: {}",selectedUser.getRealName());
 
             View viewRecordsView = View.builder()
                     .type("home")
+                    .privateMetadata(selectedUser.getId())
                     .blocks(createAllRecordsView(selectedUser))
                     .build();
 
@@ -239,7 +232,6 @@ public class LiftbotApp {
 
         List<LayoutBlock> blocks = new ArrayList<>();
 
-        //build title
         blocks.add(HeaderBlock.builder().blockId("selected_user_name")
                 .text(new PlainTextObject(user.getName(),true)).build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
@@ -282,8 +274,7 @@ public class LiftbotApp {
 
     private void initSaveAction(App liftbotApp) {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
-            String userId = request.getPayload().getUser().getId();
-
+            LOGGER.info("Save Action invoked by {}", request.getPayload().getUser().getName());
             Exercise record = getRecordFromPayload(request.getPayload());
             LOGGER.debug("saving record to db: {}",record);
             repo.save(record);
@@ -292,6 +283,8 @@ public class LiftbotApp {
 
             View savedRecordView = View.builder()
                     .type("home")
+                    .privateMetadata(selectedUser.getId())
+                    .privateMetadata(selectedUser.getId())
                     .blocks(createAllRecordsView(selectedUser))
                     .build();
 
@@ -300,7 +293,7 @@ public class LiftbotApp {
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)
                     .token(context.getBotToken())
-                    .userId(userId)
+                    .userId(request.getPayload().getUser().getId())
                     .build();
             context.client().viewsPublish(updateView);
             return context.ack();
@@ -308,7 +301,7 @@ public class LiftbotApp {
     }
 
     private List<LayoutBlock> createAllRecordsView(User user) {
-
+        LOGGER.debug("creating All Records view for {}", user.getName());
         List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
         List<LayoutBlock> blocks = new ArrayList<>();
 
