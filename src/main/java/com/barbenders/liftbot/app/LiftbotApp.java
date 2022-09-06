@@ -73,7 +73,7 @@ public class LiftbotApp {
 
             View homeLanding = View.builder()
                     .type("home")
-                    .blocks(createHomeLanding(currentUser.isAdmin() || currentUser.isOwner()))
+                    .blocks(createHomeLanding(currentUser.isAdmin() || currentUser.getId().equals("U03MT066GJU")))
                     .build();
             ViewsPublishRequest homeView = ViewsPublishRequest.builder()
                     .view(homeLanding)
