@@ -33,6 +33,7 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.stream.Collectors;
 
 @Configuration
@@ -201,7 +202,7 @@ public class LiftbotApp {
         return null;
     }
 
-    private String getSelectedUserIdFromRequest(BlockActionRequest request) {
+    private String getSelectedUserIdFromRequest(BlockActionRequest request) throws NoSuchElementException {
         return request.getPayload().getView().getState()
                 .getValues().values().stream()
                 .filter(value -> value.containsKey("selected_user")).findFirst().get()
@@ -217,7 +218,7 @@ public class LiftbotApp {
             User selectedUser;
             try {
                 selectedUser = getUserWithId(context, getSelectedUserIdFromRequest(request));
-            } catch (NullPointerException npe) {
+            } catch (NoSuchElementException nse) {
                 selectedUser = getUserWithId(context, user.getId());
             }
             LOGGER.debug("selected user: {}",selectedUser.getRealName());
