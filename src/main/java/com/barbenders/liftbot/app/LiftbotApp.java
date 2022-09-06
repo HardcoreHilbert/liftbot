@@ -270,7 +270,7 @@ public class LiftbotApp {
 
     private Exercise getRecordFromPayload(BlockActionPayload payload) {
         Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
-        LOGGER.debug("vsValues: " + vsValues);
+        LOGGER.debug("vsValues: " + payload.getView().getState());
         Exercise record = new Exercise();
         record.setUserid(vsValues.get("selected_user_id").get("users_select-action").getSelectedUser());
         record.setName(vsValues.get("exercise_name_input").get("plain_text_input-action").getValue());
