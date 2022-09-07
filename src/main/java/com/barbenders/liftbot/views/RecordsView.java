@@ -27,7 +27,7 @@ public class RecordsView {
 
     public List<LayoutBlock> getAllRecordsView(ExerciseRepository repo) {
 
-        log.info("creating All Records view for {}", user.getProfile().getDisplayName());
+        log.info("getting [All Records] view for [{}]", user.getProfile().getDisplayName());
         List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
 
         //build title
@@ -50,6 +50,7 @@ public class RecordsView {
 
     public List<LayoutBlock> getAddRecordView() {
 
+        log.info("getting [Add Record] view for [{}]", user.getProfile().getDisplayName());
         blocks.add(HeaderBlock.builder().blockId("selected_user_name")
                 .text(new PlainTextObject(user.getProfile().getDisplayName(),true)).build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")

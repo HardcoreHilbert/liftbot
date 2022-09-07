@@ -21,12 +21,14 @@ import java.util.NoSuchElementException;
 public class LiftbotUtil {
 
     public User getUserWithId(Context context, String userId) throws SlackApiException, IOException {
+        log.info("retrieving user object using id [{}]",userId);
         return context.client().usersInfo(UsersInfoRequest.builder()
                     .user(userId)
                     .token(context.getBotToken()).build()).getUser();
     }
 
     public User getSelectedUserFromRequest(Context context, BlockActionRequest request) throws NoSuchElementException, SlackApiException, IOException {
+        log.info("getting selected user id from the request object");
         String userId = request.getPayload().getView().getState()
                 .getValues().values().stream()
                 .filter(value -> value.containsKey("selected_user")).findFirst().get()
@@ -35,6 +37,7 @@ public class LiftbotUtil {
     }
 
     public Exercise getRecordFromPayload(BlockActionPayload payload) {
+        log.info("retrieving record from inputs on payload");
         Map<String, Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
         Exercise record = new Exercise();
 
