@@ -6,6 +6,7 @@ import javax.servlet.annotation.WebServlet;
 
 @WebServlet("/slack/events")
 public class LiftbotController extends SlackAppServlet {
+
     public LiftbotController(App app) {
         super(app);
     }

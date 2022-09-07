@@ -21,8 +21,10 @@ bootJar {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-mongodb'
 	implementation 'org.springframework.boot:spring-boot-starter-web'
-	implementation 'com.slack.api:bolt-servlet:1.24.0'
+	implementation 'com.slack.api:bolt-servlet:1.25.1'
+
 	compileOnly 'org.projectlombok:lombok:1.18.24'
+	annotationProcessor 'org.projectlombok:lombok:1.18.24'
 
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 }

@@ -21,8 +21,8 @@ public class RecordsView {
     @Autowired
     ExerciseRepository repo;
 
-    private List<LayoutBlock> blocks;
-    private User user;
+    private final List<LayoutBlock> blocks;
+    private final User user;
 
     public RecordsView(User user) {
         this.user = user;

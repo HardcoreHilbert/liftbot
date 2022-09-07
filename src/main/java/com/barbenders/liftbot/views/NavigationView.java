@@ -15,8 +15,8 @@ import java.util.List;
 @Slf4j
 public class NavigationView {
 
-    private List<LayoutBlock> blocks;
-    private User user;
+    private final List<LayoutBlock> blocks;
+    private final User user;
 
     public NavigationView(User user) {
         this.user = user;
