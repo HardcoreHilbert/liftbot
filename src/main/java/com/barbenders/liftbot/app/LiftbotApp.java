@@ -118,7 +118,7 @@ public class LiftbotApp {
         liftbotApp.blockAction("view_records", (request, context) -> {
 
             User selectedUser = LiftbotUtil.getUserWithId(context, request.getPayload().getView().getPrivateMetadata());
-            log.info("the [view_record] action is being performed on user: [{}]", selectedUser.getName());
+            log.info("the [view_record] action is being performed on user: [{}]", selectedUser);
 
             View viewRecordsView = View.builder()
                     .type("home")
