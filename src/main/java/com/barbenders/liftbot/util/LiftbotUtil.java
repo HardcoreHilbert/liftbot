@@ -21,9 +21,17 @@ import java.util.NoSuchElementException;
 public class LiftbotUtil {
 
     public User getUserWithId(Context context, String userId) throws SlackApiException, IOException {
-        return context.client().usersInfo(UsersInfoRequest.builder()
-                    .user(userId)
-                    .token(context.getBotToken()).build()).getUser();
+        log.debug("userID {}",userId);
+        String token = context.getBotToken();
+        log.debug("token {}", token);
+        UsersInfoRequest uReq = UsersInfoRequest.builder().user(userId).token(token).build();
+        log.debug("user request {}", uReq);
+        User reqUser = context.client().usersInfo(uReq).getUser();
+        log.debug("requested user: {}", reqUser);
+        return reqUser;
+//        return context.client().usersInfo(UsersInfoRequest.builder()
+//                    .user(userId)
+//                    .token(context.getBotToken()).build()).getUser();
     }
 
     public User getSelectedUserFromRequest(Context context, BlockActionRequest request) throws NoSuchElementException, SlackApiException, IOException {
