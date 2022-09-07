@@ -2,36 +2,21 @@ package com.barbenders.liftbot.app;
 
 import com.barbenders.liftbot.model.Exercise;
 import com.barbenders.liftbot.repo.ExerciseRepository;
+import com.barbenders.liftbot.util.LiftbotUtil;
+import com.barbenders.liftbot.views.NavigationView;
+import com.barbenders.liftbot.views.RecordsView;
 import com.slack.api.app_backend.interactive_components.payload.BlockActionPayload;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.bolt.context.Context;
-import com.slack.api.bolt.request.builtin.BlockActionRequest;
-import com.slack.api.methods.SlackApiException;
-import com.slack.api.methods.request.users.UsersInfoRequest;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.User;
-import com.slack.api.model.block.*;
-import com.slack.api.model.block.composition.MarkdownTextObject;
-import com.slack.api.model.block.composition.PlainTextObject;
-import com.slack.api.model.block.element.BlockElement;
-import com.slack.api.model.block.element.ButtonElement;
-import com.slack.api.model.block.element.PlainTextInputElement;
-import com.slack.api.model.block.element.UsersSelectElement;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
-import com.slack.api.model.view.ViewState;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
 
 @Configuration
 public class LiftbotApp {
@@ -68,12 +53,12 @@ public class LiftbotApp {
     private void initHomeView(App liftBot) {
         LOGGER.info("initializing home screen view");
         liftBot.event(AppHomeOpenedEvent.class, (request, context) -> {
-            User currentUser = getUserWithId(context, request.getEvent().getUser());
+            User currentUser = LiftbotUtil.getUserWithId(context, request.getEvent().getUser());
             LOGGER.info("user that opened home view: {}", currentUser.getName());
 
             View homeLanding = View.builder()
                     .type("home")
-                    .blocks(createHomeLanding(currentUser.isAdmin() || currentUser.getId().equals("U03MT066GJU")))
+                    .blocks(new NavigationView(currentUser).getHomeLanding())// || currentUser.getId().equals("U03MT066GJU")))
                     .build();
             ViewsPublishRequest homeView = ViewsPublishRequest.builder()
                     .view(homeLanding)
@@ -86,44 +71,6 @@ public class LiftbotApp {
         });
     }
 
-    private List<LayoutBlock> createHomeLanding(boolean isAdmin) {
-        LOGGER.info("creating home landing layout");
-
-        if(isAdmin) {
-            return new ArrayList<LayoutBlock>() {
-                {
-                    add(SectionBlock.builder()
-                            .text(MarkdownTextObject.builder().text("Whose fate are we controlling today?").build())
-                            .accessory(UsersSelectElement.builder().actionId("selected_user").build())
-                            .build());
-                }
-            };
-        } else {
-            return new ArrayList<LayoutBlock>() {
-                {
-                    add(createActionChoiceLayout());
-                }
-            };
-        }
-    }
-
-    private ActionsBlock createActionChoiceLayout() {
-        return ActionsBlock.builder()
-                .elements(new ArrayList<BlockElement>(){
-                    {
-                        add(ButtonElement.builder()
-                                .actionId("view_records")
-                                .text(PlainTextObject.builder().text("View Workout Records").build())
-                                .build());
-                        add(ButtonElement.builder()
-                                .actionId("add_record")
-                                .text(PlainTextObject.builder().text("Add New Record").build())
-                                .build());
-                    }
-                })
-                .build();
-    }
-
     private void initUserSelectionAction(App liftBot) {
         LOGGER.info("initializing User Selection action");
         liftBot.blockAction("selected_user", (request, context) -> {
@@ -131,12 +78,12 @@ public class LiftbotApp {
             BlockActionPayload.User currentUser = request.getPayload().getUser();
             LOGGER.info("current user: {}", currentUser.getName());
 
-            User selectedUser = getUserWithId(context,getSelectedUserIdFromRequest(request));
+            User selectedUser = LiftbotUtil.getSelectedUserFromRequest(context,request);
 
             View actionChoiceView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(createAdminChoiceActionView(selectedUser))
+                    .blocks(new NavigationView(selectedUser).getAdminChoiceActionView())
                     .build();
 
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
@@ -150,17 +97,6 @@ public class LiftbotApp {
         });
     }
 
-    private ArrayList<LayoutBlock> createAdminChoiceActionView(User selectedUser) {
-        return new ArrayList<LayoutBlock>(){
-            {
-                add(HeaderBlock.builder().blockId("selected_user_name")
-                        .text(new PlainTextObject(selectedUser.getName(),true)).build());
-                add(new DividerBlock());
-                add(createActionChoiceLayout());
-            }
-        };
-    }
-
     private void initAddRecordAction(App liftbotApp) {
         LOGGER.info("initializing Add Record action");
         liftbotApp.blockAction("add_record", (request, context) -> {
@@ -168,13 +104,13 @@ public class LiftbotApp {
             String userId = request.getPayload().getUser().getId();
             LOGGER.debug("current user: {}", userId);
 
-            User selectedUser = getUserWithId(context,request.getPayload().getView().getPrivateMetadata());
+            User selectedUser = LiftbotUtil.getUserWithId(context,request.getPayload().getView().getPrivateMetadata());
             LOGGER.debug("selected user: {}", selectedUser.getName());
 
             View addRecordView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(createAddRecordView(selectedUser))
+                    .blocks(new RecordsView(selectedUser).getAddRecordView())
                     .build();
             ViewsPublishRequest addView = ViewsPublishRequest.builder()
                     .view(addRecordView)
@@ -187,35 +123,17 @@ public class LiftbotApp {
         });
     }
 
-    private User getUserWithId(Context context, String userId) {
-        try {
-            return context.client().usersInfo(UsersInfoRequest.builder()
-                    .user(userId)
-                    .token(context.getBotToken()).build()).getUser();
-        } catch (SlackApiException | IOException ex) {
-            LOGGER.error("Exception while retrieving user info for id: {}",userId, ex);
-        }
-        return null;
-    }
-
-    private String getSelectedUserIdFromRequest(BlockActionRequest request) throws NoSuchElementException {
-        return request.getPayload().getView().getState()
-                .getValues().values().stream()
-                .filter(value -> value.containsKey("selected_user")).findFirst().get()
-                .get("selected_user").getSelectedUser();
-    }
-
     private void initViewRecordsAction(App liftbotApp) {
         LOGGER.info("initializing View Records action");
         liftbotApp.blockAction("view_records", (request, context) -> {
 
-            User selectedUser = getUserWithId(context, request.getPayload().getView().getPrivateMetadata());
+            User selectedUser = LiftbotUtil.getUserWithId(context, request.getPayload().getView().getPrivateMetadata());
             LOGGER.debug("selected user: {}",selectedUser.getRealName());
 
             View viewRecordsView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(createAllRecordsView(selectedUser))
+                    .blocks(new RecordsView(selectedUser).getAllRecordsView())
                     .build();
 
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
@@ -228,64 +146,19 @@ public class LiftbotApp {
         });
     }
 
-    private List<LayoutBlock> createAddRecordView(User user) {
-
-        List<LayoutBlock> blocks = new ArrayList<>();
-
-        blocks.add(HeaderBlock.builder().blockId("selected_user_name")
-                .text(new PlainTextObject(user.getName(),true)).build());
-        blocks.add(InputBlock.builder().blockId("exercise_name_input")
-                .label(new PlainTextObject("Exercise Name",true))
-                .element(new PlainTextInputElement()).build());
-        blocks.add(InputBlock.builder().blockId("equipment_needed_input")
-                .label(new PlainTextObject("Equipment Needed",true))
-                .element(new PlainTextInputElement()).build());
-        blocks.add(InputBlock.builder().blockId("sets_input")
-                .label(new PlainTextObject("Sets",true))
-                .element(new PlainTextInputElement()).build());
-        blocks.add(InputBlock.builder().blockId("reps_input")
-                .label(new PlainTextObject("Reps",true))
-                .element(new PlainTextInputElement()).build());
-        blocks.add(InputBlock.builder().blockId("weight_input")
-                .label(new PlainTextObject("Weight",true))
-                .element(new PlainTextInputElement()).build());
-        blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
-            {
-                add(ButtonElement.builder()
-                        .text(new PlainTextObject("Save",true))
-                        .actionId("exercise_save").build());
-            }
-        }).build());
-        return blocks;
-    }
-
-    private Exercise getRecordFromPayload(BlockActionPayload payload) {
-        Map<String,Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
-        LOGGER.debug("vsValues: " + vsValues);
-        Exercise record = new Exercise();
-        record.setUserid(payload.getView().getPrivateMetadata());
-        record.setName(new ArrayList<>(vsValues.get("exercise_name_input").values()).get(0).getValue());
-        record.setEquipment(new ArrayList<>(vsValues.get("equipment_needed_input").values()).get(0).getValue());
-        record.setSets(new ArrayList<>(vsValues.get("sets_input").values()).get(0).getValue());
-        record.setReps(new ArrayList<>(vsValues.get("reps_input").values()).get(0).getValue());
-        record.setWeight(new ArrayList<>(vsValues.get("weight_input").values()).get(0).getValue());
-        return record;
-    }
-
     private void initSaveAction(App liftbotApp) {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
             LOGGER.info("Save Action invoked by {}", request.getPayload().getUser().getName());
-            Exercise record = getRecordFromPayload(request.getPayload());
+            Exercise record = LiftbotUtil.getRecordFromPayload(request.getPayload());
             LOGGER.debug("saving record to db: {}",record);
             repo.save(record);
 
-            User selectedUser = getUserWithId(context,record.getUserid());
+            User selectedUser = LiftbotUtil.getUserWithId(context,record.getUserid());
 
             View savedRecordView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .privateMetadata(selectedUser.getId())
-                    .blocks(createAllRecordsView(selectedUser))
+                    .blocks(new RecordsView(selectedUser).getAllRecordsView())
                     .build();
 
             LOGGER.info(savedRecordView.toString());
@@ -299,28 +172,4 @@ public class LiftbotApp {
             return context.ack();
         });
     }
-
-    private List<LayoutBlock> createAllRecordsView(User user) {
-        LOGGER.debug("creating All Records view for {}", user.getName());
-        List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
-        List<LayoutBlock> blocks = new ArrayList<>();
-
-        //build title
-        HeaderBlock title = HeaderBlock.builder()
-                .text(new PlainTextObject(user.getRealName(),true)).build();
-        blocks.add(title);
-
-        for(Exercise record : allRecords) {
-            blocks.add(new DividerBlock());
-            blocks.add(SectionBlock.builder()
-                    .text(MarkdownTextObject.builder().text("*"+record.getName()+"*").build()).build()
-            );
-            blocks.add(SectionBlock.builder()
-                    .text(MarkdownTextObject.builder().text("("+record.getEquipment()+") : "
-                            +record.getSets()+" x "+record.getReps()+" x "+record.getWeight()+"lb").build()).build()
-            );
-        }
-        return blocks;
-    }
-
 }
