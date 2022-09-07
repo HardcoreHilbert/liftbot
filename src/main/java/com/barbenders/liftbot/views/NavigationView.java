@@ -27,11 +27,13 @@ public class NavigationView {
         log.info("creating home landing layout");
 
         if(user.isAdmin()) {
+            log.debug("user is admin, returning admin landing");
             blocks.add(SectionBlock.builder()
                             .text(MarkdownTextObject.builder().text("Whose fate are we controlling today?").build())
                             .accessory(UsersSelectElement.builder().actionId("selected_user").build())
                             .build());
         } else {
+            log.debug("user is not admin, returning normal user landing");
             blocks.add(getActionChoiceLayout());
         }
         return blocks;
