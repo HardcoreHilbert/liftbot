@@ -27,12 +27,12 @@ public class RecordsView {
 
     public List<LayoutBlock> getAllRecordsView(ExerciseRepository repo) {
 
-        log.info("creating All Records view for {}", user.getName());
+        log.info("creating All Records view for {}", user.getProfile().getDisplayName());
         List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
 
         //build title
         HeaderBlock title = HeaderBlock.builder()
-                .text(new PlainTextObject(user.getName(),true)).build();
+                .text(new PlainTextObject(user.getProfile().getDisplayName(),true)).build();
         blocks.add(title);
 
         for(Exercise record : allRecords) {
@@ -51,7 +51,7 @@ public class RecordsView {
     public List<LayoutBlock> getAddRecordView() {
 
         blocks.add(HeaderBlock.builder().blockId("selected_user_name")
-                .text(new PlainTextObject(user.getName(),true)).build());
+                .text(new PlainTextObject(user.getProfile().getDisplayName(),true)).build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
