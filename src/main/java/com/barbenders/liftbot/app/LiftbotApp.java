@@ -54,6 +54,7 @@ public class LiftbotApp {
 
             View homeLanding = View.builder()
                     .type("home")
+                    .privateMetadata(currentUser.getId())
                     .blocks(new NavigationView(currentUser).getHomeLanding())
                     .build();
             ViewsPublishRequest homeView = ViewsPublishRequest.builder()
@@ -94,7 +95,7 @@ public class LiftbotApp {
         log.info("initializing Add Record action");
         liftbotApp.blockAction("add_record", (request, context) -> {
 
-            User selectedUser = LiftbotUtil.getUserWithId(context,request.getPayload().getView().getPrivateMetadata());
+            User selectedUser = LiftbotUtil.getUserWithId(context, request.getPayload().getView().getPrivateMetadata());
             log.info("the [add_record] action is being performed on user: [{}]", selectedUser.getName());
 
             View addRecordView = View.builder()
