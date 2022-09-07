@@ -124,7 +124,7 @@ public class LiftbotApp {
             View viewRecordsView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(new RecordsView(selectedUser).getAllRecordsView())
+                    .blocks(new RecordsView(selectedUser).getAllRecordsView(repo))
                     .build();
 
             ViewsPublishRequest recordView = ViewsPublishRequest.builder()
@@ -151,7 +151,7 @@ public class LiftbotApp {
             View savedRecordView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(new RecordsView(selectedUser).getAllRecordsView())
+                    .blocks(new RecordsView(selectedUser).getAllRecordsView(repo))
                     .build();
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)

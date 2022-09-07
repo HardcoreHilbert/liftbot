@@ -10,16 +10,12 @@ import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.PlainTextInputElement;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
 public class RecordsView {
-
-    @Autowired
-    ExerciseRepository repo;
 
     private final List<LayoutBlock> blocks;
     private final User user;
@@ -29,7 +25,7 @@ public class RecordsView {
         this.blocks = new ArrayList<>();
     }
 
-    public List<LayoutBlock> getAllRecordsView() {
+    public List<LayoutBlock> getAllRecordsView(ExerciseRepository repo) {
 
         log.info("creating All Records view for {}", user.getName());
         List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
