@@ -20,18 +20,13 @@ import java.util.NoSuchElementException;
 @Slf4j
 public class LiftbotUtil {
 
-    public User getUserWithId(Context context, String userId) {
-        try {
-            return context.client().usersInfo(UsersInfoRequest.builder()
+    public User getUserWithId(Context context, String userId) throws SlackApiException, IOException {
+        return context.client().usersInfo(UsersInfoRequest.builder()
                     .user(userId)
                     .token(context.getBotToken()).build()).getUser();
-        } catch (SlackApiException | IOException ex) {
-            log.error("Exception while retrieving user info for id: {}",userId, ex);
-        }
-        return null;
     }
 
-    public User getSelectedUserFromRequest(Context context, BlockActionRequest request) throws NoSuchElementException {
+    public User getSelectedUserFromRequest(Context context, BlockActionRequest request) throws NoSuchElementException, SlackApiException, IOException {
         String userId = request.getPayload().getView().getState()
                 .getValues().values().stream()
                 .filter(value -> value.containsKey("selected_user")).findFirst().get()
