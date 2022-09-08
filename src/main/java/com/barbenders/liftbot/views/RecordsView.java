@@ -33,9 +33,6 @@ public class RecordsView {
         blocks.add(SectionBlock.builder()
                 .text(MarkdownTextObject.builder()
                         .text("*"+user.getProfile().getDisplayName()+"*").build())
-                .accessory(ButtonElement.builder()
-                        .actionId("nav_home")
-                        .text(new PlainTextObject("Back", true)).build())
                 .build());
 
         for(Exercise record : allRecords) {
@@ -48,6 +45,13 @@ public class RecordsView {
                             +record.getSets()+" x "+record.getReps()+" x "+record.getWeight()+"lb").build()).build()
             );
         }
+        blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
+            {
+                add(ButtonElement.builder()
+                        .actionId("nav_home")
+                        .text(new PlainTextObject("Back", true)).build());
+            }
+        }).build());
         return blocks;
     }
 
@@ -57,9 +61,6 @@ public class RecordsView {
         blocks.add(SectionBlock.builder()
                         .text(MarkdownTextObject.builder()
                                 .text("*"+user.getProfile().getDisplayName()+"*").build())
-                        .accessory(ButtonElement.builder()
-                                .actionId("nav_home")
-                                .text(new PlainTextObject("Back", true)).build())
                         .build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
@@ -81,6 +82,9 @@ public class RecordsView {
                 add(ButtonElement.builder()
                         .text(new PlainTextObject("Save",true))
                         .actionId("exercise_save").build());
+                add(ButtonElement.builder()
+                        .actionId("nav_home")
+                        .text(new PlainTextObject("Back", true)).build());
             }
         }).build());
         return blocks;
