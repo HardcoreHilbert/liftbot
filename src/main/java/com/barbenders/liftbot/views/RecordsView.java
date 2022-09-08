@@ -12,10 +12,11 @@ import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.PlainTextInputElement;
 import com.slack.api.model.block.element.StaticSelectElement;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
@@ -108,12 +109,14 @@ public class RecordsView {
     private List<OptionObject> createEquipmentOptions() {
         List<OptionObject> options = new ArrayList<>();
         try {
-            InputStream inputStream = new FileInputStream("equipment.yml");
+            InputStream inputStream = new ClassPathResource("equipment.yml").getInputStream();
             Yaml yaml = new Yaml();
             equipment = yaml.load(inputStream);
         } catch(FileNotFoundException fnf) {
             log.warn("equipment.yml file not found");
             return new ArrayList<>();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
         equipment.forEach(entry -> options.add(OptionObject.builder()
                 .text(new PlainTextObject(entry,true))
