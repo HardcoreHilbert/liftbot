@@ -42,6 +42,7 @@ public class LiftbotApp {
         initAddRecordAction(liftbotApp);
         initViewRecordsAction(liftbotApp);
         initSaveRecordAction(liftbotApp);
+        initHomeNavAction(liftbotApp);
 
         return liftbotApp;
     }
@@ -52,17 +53,32 @@ public class LiftbotApp {
             User currentUser = LiftbotUtil.getUserWithId(context, request.getEvent().getUser());
             log.info("user that opened home view: {}", currentUser.getName());
 
-            View homeLanding = View.builder()
-                    .type("home")
-                    .privateMetadata(currentUser.getId())
-                    .blocks(new NavigationView(currentUser).getHomeLanding())
-                    .build();
-            ViewsPublishRequest homeView = ViewsPublishRequest.builder()
-                    .view(homeLanding)
-                    .token(context.getBotToken())
-                    .userId(currentUser.getId())
-                    .build();
-            context.client().viewsPublish(homeView);
+            context.client().viewsPublish(getHomeLandingView(context.getBotToken(), currentUser));
+
+            return context.ack();
+        });
+    }
+
+    private ViewsPublishRequest getHomeLandingView(String token, User currentUser) {
+        View homeLanding = View.builder()
+                .type("home")
+                .privateMetadata(currentUser.getId())
+                .blocks(new NavigationView(currentUser).getHomeLanding())
+                .build();
+        return ViewsPublishRequest.builder()
+                .view(homeLanding)
+                .token(token)
+                .userId(currentUser.getId())
+                .build();
+    }
+
+    private void initHomeNavAction(App liftBot) {
+        log.info("initializing Home Nav action");
+        liftBot.blockAction("nav_home", (request, context) -> {
+            User currentUser = LiftbotUtil.getUserWithId(context,request.getPayload().getUser().getId());
+            log.info("user that opened home view: {}", currentUser.getName());
+
+            context.client().viewsPublish(getHomeLandingView(context.getBotToken(), currentUser));
 
             return context.ack();
         });

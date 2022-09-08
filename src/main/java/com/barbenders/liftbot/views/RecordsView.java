@@ -55,7 +55,7 @@ public class RecordsView {
                         .text(MarkdownTextObject.builder()
                                 .text("*"+user.getProfile().getDisplayName()+"*").build())
                         .accessory(ButtonElement.builder()
-                                .actionId("app_home_opened")
+                                .actionId("nav_home")
                                 .text(new PlainTextObject("Back", true)).build())
                         .build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
