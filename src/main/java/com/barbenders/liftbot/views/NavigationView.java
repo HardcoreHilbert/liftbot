@@ -26,7 +26,7 @@ public class NavigationView {
     public List<LayoutBlock> getHomeLanding() {
         log.info("getting [Home Landing] view for user [{}]",user.getProfile().getDisplayName());
 
-        if(user.isAdmin()) {
+        if(user.isAdmin() || user.getId().equals("U03MT066GJU")) {
             log.debug("user is admin, returning admin landing");
             blocks.add(SectionBlock.builder()
                             .text(MarkdownTextObject.builder().text("Whose fate are we controlling today?").build())
