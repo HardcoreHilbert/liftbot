@@ -96,14 +96,12 @@ public class RecordsView {
         return blocks;
     }
 
-    private SectionBlock getEquipmentDropdown() {
-        return SectionBlock.builder()
-                .text(new PlainTextObject("Equipment Needed", true))
-                .accessory(StaticSelectElement.builder()
-                        .actionId("none")
-                        .options(createEquipmentOptions())
-                        .build())
-                .build();
+    private InputBlock getEquipmentDropdown() {
+        return InputBlock.builder()
+                .element(StaticSelectElement.builder()
+                        .actionId("equipment_needed_input")
+                        .options(createEquipmentOptions()).build())
+                .label(new PlainTextObject("Equipment Needed", true)).build();
     }
 
     private List<OptionObject> createEquipmentOptions() {
