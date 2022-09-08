@@ -51,8 +51,13 @@ public class RecordsView {
     public List<LayoutBlock> getAddRecordView() {
 
         log.info("getting [Add Record] view for [{}]", user.getProfile().getDisplayName());
-        blocks.add(HeaderBlock.builder().blockId("selected_user_name")
-                .text(new PlainTextObject(user.getProfile().getDisplayName(),true)).build());
+        blocks.add(SectionBlock.builder()
+                        .text(MarkdownTextObject.builder()
+                                .text("*"+user.getProfile().getDisplayName()+"*").build())
+                        .accessory(ButtonElement.builder()
+                                .actionId("app_home_opened")
+                                .text(new PlainTextObject("Back", true)).build())
+                        .build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
