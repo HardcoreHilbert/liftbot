@@ -5,12 +5,18 @@ import com.barbenders.liftbot.repo.ExerciseRepository;
 import com.slack.api.model.User;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
+import com.slack.api.model.block.composition.OptionObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.PlainTextInputElement;
+import com.slack.api.model.block.element.StaticSelectElement;
 import lombok.extern.slf4j.Slf4j;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -19,6 +25,7 @@ public class RecordsView {
 
     private final List<LayoutBlock> blocks;
     private final User user;
+    private List<String> equipment;
 
     public RecordsView(User user) {
         this.user = user;
@@ -65,9 +72,7 @@ public class RecordsView {
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
-        blocks.add(InputBlock.builder().blockId("equipment_needed_input")
-                .label(new PlainTextObject("Equipment Needed",true))
-                .element(new PlainTextInputElement()).build());
+        blocks.add(getEquipmentDropdown());
         blocks.add(InputBlock.builder().blockId("sets_input")
                 .label(new PlainTextObject("Sets",true))
                 .element(new PlainTextInputElement()).build());
@@ -88,5 +93,31 @@ public class RecordsView {
             }
         }).build());
         return blocks;
+    }
+
+    private SectionBlock getEquipmentDropdown() {
+        return SectionBlock.builder()
+                .text(new PlainTextObject("Equipment Needed", true))
+                .accessory(StaticSelectElement.builder()
+                        .actionId("none")
+                        .options(createEquipmentOptions())
+                        .build())
+                .build();
+    }
+
+    private List<OptionObject> createEquipmentOptions() {
+        List<OptionObject> options = new ArrayList<>();
+        try {
+            InputStream inputStream = new FileInputStream("equipment.yml");
+            Yaml yaml = new Yaml();
+            equipment = yaml.load(inputStream);
+        } catch(FileNotFoundException fnf) {
+            log.warn("equipment.yml file not found");
+            return new ArrayList<>();
+        }
+        equipment.forEach(entry -> options.add(OptionObject.builder()
+                .text(new PlainTextObject(entry,true))
+                .value(entry).build()));
+        return options;
     }
 }
