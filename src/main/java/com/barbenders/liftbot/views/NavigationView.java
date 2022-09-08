@@ -41,7 +41,7 @@ public class NavigationView {
     public List<LayoutBlock> getHomeLanding() {
         log.info("getting [Home Landing] view for user [{}]",user.getProfile().getDisplayName());
 
-        if(user.isAdmin() || user.getId().equals("U03MT066GJU")) {
+        if(user.isAdmin()) {
             log.debug("user is admin, returning admin landing");
             blocks.add(SectionBlock.builder()
                             .text(MarkdownTextObject.builder().text("Whose fate are we controlling today?").build())
@@ -75,7 +75,7 @@ public class NavigationView {
     public List<LayoutBlock> getAdminChoiceActionView() {
         log.info("getting [Admin Action Choice] view for admin [{}]",user.getProfile().getDisplayName());
         blocks.add(HeaderBlock.builder().blockId("selected_user_name")
-                        .text(new PlainTextObject(user.getName(),true)).build());
+                        .text(new PlainTextObject(user.getProfile().getDisplayName(),true)).build());
         blocks.add(new DividerBlock());
         blocks.add(getActionChoiceLayout());
         return blocks;
