@@ -53,23 +53,10 @@ public class LiftbotApp {
             User currentUser = LiftbotUtil.getUserWithId(context, request.getEvent().getUser());
             log.info("user that opened home view: {}", currentUser.getName());
 
-            context.client().viewsPublish(getHomeLandingView(context.getBotToken(), currentUser));
+            context.client().viewsPublish(new NavigationView(currentUser).getHomeLandingView(context.getBotToken()));
 
             return context.ack();
         });
-    }
-
-    private ViewsPublishRequest getHomeLandingView(String token, User currentUser) {
-        View homeLanding = View.builder()
-                .type("home")
-                .privateMetadata(currentUser.getId())
-                .blocks(new NavigationView(currentUser).getHomeLanding())
-                .build();
-        return ViewsPublishRequest.builder()
-                .view(homeLanding)
-                .token(token)
-                .userId(currentUser.getId())
-                .build();
     }
 
     private void initHomeNavAction(App liftBot) {
@@ -78,7 +65,7 @@ public class LiftbotApp {
             User currentUser = LiftbotUtil.getUserWithId(context,request.getPayload().getUser().getId());
             log.info("user that opened home view: {}", currentUser.getName());
 
-            context.client().viewsPublish(getHomeLandingView(context.getBotToken(), currentUser));
+            context.client().viewsPublish(new NavigationView(currentUser).getHomeLandingView(context.getBotToken()));
 
             return context.ack();
         });

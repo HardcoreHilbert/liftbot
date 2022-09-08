@@ -1,5 +1,6 @@
 package com.barbenders.liftbot.views;
 
+import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.User;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
@@ -7,6 +8,7 @@ import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.UsersSelectElement;
+import com.slack.api.model.view.View;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -21,6 +23,19 @@ public class NavigationView {
     public NavigationView(User user) {
         this.user = user;
         this.blocks = new ArrayList<>();
+    }
+
+    public ViewsPublishRequest getHomeLandingView(String token) {
+        View homeLanding = View.builder()
+                .type("home")
+                .privateMetadata(user.getId())
+                .blocks(getHomeLanding())
+                .build();
+        return ViewsPublishRequest.builder()
+                .view(homeLanding)
+                .token(token)
+                .userId(user.getId())
+                .build();
     }
 
     public List<LayoutBlock> getHomeLanding() {
