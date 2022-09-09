@@ -2,22 +2,17 @@ package com.barbenders.liftbot.views;
 
 import com.barbenders.liftbot.model.Exercise;
 import com.barbenders.liftbot.repo.ExerciseRepository;
+import com.barbenders.liftbot.util.LiftbotUtil;
 import com.slack.api.model.User;
 import com.slack.api.model.block.*;
 import com.slack.api.model.block.composition.MarkdownTextObject;
-import com.slack.api.model.block.composition.OptionObject;
 import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.block.element.BlockElement;
 import com.slack.api.model.block.element.ButtonElement;
 import com.slack.api.model.block.element.PlainTextInputElement;
 import com.slack.api.model.block.element.StaticSelectElement;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.io.ClassPathResource;
-import org.yaml.snakeyaml.Yaml;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -73,10 +68,8 @@ public class RecordsView {
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
-        blocks.add(getEquipmentDropdown());
-        blocks.add(InputBlock.builder().blockId("sets_input")
-                .label(new PlainTextObject("Sets",true))
-                .element(new PlainTextInputElement()).build());
+        blocks.add(getDropDown("equipment_needed_input","equipment.yml","Equipment Needed"));
+        blocks.add(getDropDown("sets_input","sets.yml","Sets"));
         blocks.add(InputBlock.builder().blockId("reps_input")
                 .label(new PlainTextObject("Reps",true))
                 .element(new PlainTextInputElement()).build());
@@ -96,29 +89,12 @@ public class RecordsView {
         return blocks;
     }
 
-    private InputBlock getEquipmentDropdown() {
+    private InputBlock getDropDown(String inputId, String fileName, String label) {
         return InputBlock.builder()
                 .element(StaticSelectElement.builder()
-                        .actionId("equipment_needed_input")
-                        .options(createEquipmentOptions()).build())
-                .label(new PlainTextObject("Equipment Needed", true)).build();
+                        .actionId(inputId)
+                        .options(LiftbotUtil.createDropDownOptions(fileName)).build())
+                .label(new PlainTextObject(label, true)).build();
     }
 
-    private List<OptionObject> createEquipmentOptions() {
-        List<OptionObject> options = new ArrayList<>();
-        try {
-            InputStream inputStream = new ClassPathResource("equipment.yml").getInputStream();
-            Yaml yaml = new Yaml();
-            equipment = yaml.load(inputStream);
-        } catch(FileNotFoundException fnf) {
-            log.warn("equipment.yml file not found");
-            return new ArrayList<>();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        equipment.forEach(entry -> options.add(OptionObject.builder()
-                .text(new PlainTextObject(entry,true))
-                .value(entry).build()));
-        return options;
-    }
 }

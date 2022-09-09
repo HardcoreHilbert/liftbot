@@ -7,12 +7,19 @@ import com.slack.api.bolt.request.builtin.BlockActionRequest;
 import com.slack.api.methods.SlackApiException;
 import com.slack.api.methods.request.users.UsersInfoRequest;
 import com.slack.api.model.User;
+import com.slack.api.model.block.composition.OptionObject;
+import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.view.ViewState;
 import lombok.experimental.UtilityClass;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.io.ClassPathResource;
+import org.yaml.snakeyaml.Yaml;
 
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 
@@ -49,5 +56,24 @@ public class LiftbotUtil {
         record.setWeight(new ArrayList<>(vsValues.get("weight_input").values()).get(0).getValue());
 
         return record;
+    }
+
+    public List<OptionObject> createDropDownOptions(String filename) {
+        List<OptionObject> options = new ArrayList<>();
+        List<String> equipment = new ArrayList<>();
+        try {
+            InputStream inputStream = new ClassPathResource(filename).getInputStream();
+            Yaml yaml = new Yaml();
+            equipment = yaml.load(inputStream);
+        } catch(FileNotFoundException fnf) {
+            log.warn("equipment.yml file not found");
+            return new ArrayList<>();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        equipment.forEach(entry -> options.add(OptionObject.builder()
+                .text(new PlainTextObject(entry,true))
+                .value(entry).build()));
+        return options;
     }
 }
