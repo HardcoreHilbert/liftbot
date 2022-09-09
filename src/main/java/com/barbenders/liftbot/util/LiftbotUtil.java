@@ -72,7 +72,7 @@ public class LiftbotUtil {
             e.printStackTrace();
         }
         equipment.forEach(entry -> options.add(OptionObject.builder()
-                .text(new PlainTextObject(entry,true))
+                .text(new PlainTextObject(String.valueOf(entry),true))
                 .value(entry).build()));
         return options;
     }
