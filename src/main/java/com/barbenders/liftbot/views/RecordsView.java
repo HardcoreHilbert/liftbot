@@ -70,9 +70,7 @@ public class RecordsView {
                 .element(new PlainTextInputElement()).build());
         blocks.add(getDropDown("equipment_needed_input","equipment.yml","Equipment Needed"));
         blocks.add(getDropDown("sets_input","sets.yml","Sets"));
-        blocks.add(InputBlock.builder().blockId("reps_input")
-                .label(new PlainTextObject("Reps",true))
-                .element(new PlainTextInputElement()).build());
+        blocks.add(getDropDown("reps_input","reps.yml","Reps"));
         blocks.add(InputBlock.builder().blockId("weight_input")
                 .label(new PlainTextObject("Weight",true))
                 .element(new PlainTextInputElement()).build());
