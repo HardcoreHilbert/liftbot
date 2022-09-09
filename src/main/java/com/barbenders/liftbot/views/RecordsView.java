@@ -70,7 +70,7 @@ public class RecordsView {
         blocks.add(getDropDown("equipment_needed_input","equipment.yml","Equipment Needed"));
         blocks.add(getDropDown("sets_input","sets.yml","Sets"));
         blocks.add(getDropDown("reps_input","reps.yml","Reps"));
-        blocks.add(getDropDown("weight_input","weight.yml","Reps"));
+        blocks.add(getDropDown("weight_input","weight.yml","Weight (lb)"));
         blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
             {
                 add(ButtonElement.builder()
