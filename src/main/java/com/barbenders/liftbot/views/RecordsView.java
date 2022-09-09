@@ -89,6 +89,7 @@ public class RecordsView {
 
     private InputBlock getDropDown(String inputId, String fileName, String label) {
         return InputBlock.builder()
+                .blockId(inputId + "_block")
                 .element(StaticSelectElement.builder()
                         .actionId(inputId)
                         .options(LiftbotUtil.createDropDownOptions(fileName)).build())
