@@ -7,7 +7,6 @@ import com.barbenders.liftbot.views.NavigationView;
 import com.barbenders.liftbot.views.RecordsView;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.bolt.response.Response;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.User;
 import com.slack.api.model.event.AppHomeOpenedEvent;
@@ -150,7 +149,7 @@ public class LiftbotApp {
                 Double.parseDouble(record.getWeight());
             } catch (NumberFormatException e) {
                 String error = "{response_action:{weight_input:weight must be a number}}";
-                return Response.ok(context.respond(error));
+                //return Response.ok(context.respond(context.getResponseUrl(),error));
             }
             repo.save(record);
             log.debug("saving record to db: {}",record);

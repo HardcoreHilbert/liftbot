@@ -72,6 +72,7 @@ public class RecordsView {
         blocks.add(getDropDown("sets_input","sets.yml","Sets"));
         blocks.add(getDropDown("reps_input","reps.yml","Reps"));
         blocks.add(InputBlock.builder().blockId("weight_input")
+                        .dispatchAction(true)
                 .label(new PlainTextObject("Weight",true))
                 .element(new PlainTextInputElement()).build());
         blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
