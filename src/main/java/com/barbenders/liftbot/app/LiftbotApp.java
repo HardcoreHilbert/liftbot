@@ -145,6 +145,12 @@ public class LiftbotApp {
         liftbotApp.blockAction("exercise_save", (request,context) -> {
 
             Exercise record = LiftbotUtil.getRecordFromPayload(request.getPayload());
+            try {
+                Double.parseDouble(record.getWeight());
+            } catch (NumberFormatException e) {
+                String error = "{\"response_action\":\"errors\",\"errors\": {\"weight_input\": \"weight must be a number\"}}";
+                return context.ack();
+            }
             repo.save(record);
             log.debug("saving record to db: {}",record);
 

@@ -62,15 +62,18 @@ public class RecordsView {
 
         log.info("getting [Add Record] view for [{}]", user.getProfile().getDisplayName());
         blocks.add(SectionBlock.builder()
-                .text(MarkdownTextObject.builder().text("*"+user.getProfile().getDisplayName()+"*").build())
-                .build());
+                        .text(MarkdownTextObject.builder()
+                                .text("*"+user.getProfile().getDisplayName()+"*").build())
+                        .build());
         blocks.add(InputBlock.builder().blockId("exercise_name_input")
                 .label(new PlainTextObject("Exercise Name",true))
                 .element(new PlainTextInputElement()).build());
         blocks.add(getDropDown("equipment_needed_input","equipment.yml","Equipment Needed"));
         blocks.add(getDropDown("sets_input","sets.yml","Sets"));
         blocks.add(getDropDown("reps_input","reps.yml","Reps"));
-        blocks.add(getDropDown("weight_input","weight.yml","Weight (lb)"));
+        blocks.add(InputBlock.builder().blockId("weight_input")
+                .label(new PlainTextObject("Weight",true))
+                .element(new PlainTextInputElement()).build());
         blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
             {
                 add(ButtonElement.builder()
