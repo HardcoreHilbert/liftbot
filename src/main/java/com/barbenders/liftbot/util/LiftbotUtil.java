@@ -47,6 +47,7 @@ public class LiftbotUtil {
         log.info("retrieving record from inputs on payload");
         Map<String, Map<String, ViewState.Value>> vsValues = payload.getView().getState().getValues();
         Exercise record = new Exercise();
+        log.debug("vsValues" + vsValues.toString());
 
         record.setUserid(payload.getView().getPrivateMetadata());
         record.setName(new ArrayList<>(vsValues.get("exercise_name_input").values()).get(0).getValue());
