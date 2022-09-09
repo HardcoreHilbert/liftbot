@@ -148,7 +148,7 @@ public class LiftbotApp {
             try {
                 Double.parseDouble(record.getWeight());
             } catch (NumberFormatException e) {
-                String error = "{\"response_action\":\"errors\",\"errors\": {\"weight_input\": \"weight must be a number\"}}";
+                String error = "{response_action:errors,errors:{weight_input:weight must be a number}}";
                 return context.ack(context.toJson(error));
             }
             repo.save(record);
