@@ -60,7 +60,7 @@ public class LiftbotUtil {
 
     public List<OptionObject> createDropDownOptions(String filename) {
         List<OptionObject> options = new ArrayList<>();
-        List<String> equipment = new ArrayList<>();
+        List<Object> equipment = new ArrayList<>();
         try {
             InputStream inputStream = new ClassPathResource(filename).getInputStream();
             Yaml yaml = new Yaml();
@@ -71,9 +71,10 @@ public class LiftbotUtil {
         } catch (IOException e) {
             e.printStackTrace();
         }
+
         equipment.forEach(entry -> options.add(OptionObject.builder()
                 .text(new PlainTextObject(String.valueOf(entry),true))
-                .value(entry).build()));
+                .value(String.valueOf(entry)).build()));
         return options;
     }
 }
