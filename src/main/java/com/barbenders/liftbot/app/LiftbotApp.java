@@ -7,15 +7,19 @@ import com.barbenders.liftbot.views.NavigationView;
 import com.barbenders.liftbot.views.RecordsView;
 import com.slack.api.bolt.App;
 import com.slack.api.bolt.AppConfig;
-import com.slack.api.bolt.response.Response;
 import com.slack.api.methods.request.views.ViewsPublishRequest;
 import com.slack.api.model.User;
+import com.slack.api.model.block.InputBlock;
+import com.slack.api.model.block.LayoutBlock;
+import com.slack.api.model.block.composition.PlainTextObject;
 import com.slack.api.model.event.AppHomeOpenedEvent;
 import com.slack.api.model.view.View;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.List;
 
 @Slf4j
 @Configuration
@@ -141,26 +145,47 @@ public class LiftbotApp {
         });
     }
 
+    private void validationErrorOnWeight() {
+        new RecordsView(selectedUser).getAddRecordView()
+        View addRecordView = View.builder()
+                .type("home")
+                .privateMetadata(selectedUser.getId())
+                .blocks(new RecordsView(selectedUser).getAddRecordView())
+                .build();
+        ViewsPublishRequest addView = ViewsPublishRequest.builder()
+                .view(addRecordView)
+                .token(context.getBotToken())
+                .userId(request.getPayload().getUser().getId())
+                .build();
+        context.client().viewsPublish(addView);
+
+        return context.ack();
+    }
+
     private void initSaveRecordAction(App liftbotApp) {
         log.info("initializing Save Record action");
         liftbotApp.blockAction("exercise_save", (request,context) -> {
 
             Exercise record = LiftbotUtil.getRecordFromPayload(request.getPayload());
-            try {
-                Double.parseDouble(record.getWeight());
-            } catch (NumberFormatException e) {
-                return Response.ok("errors:[{name:weight_input,error:weight must be a number}]");
-            }
-            repo.save(record);
-            log.debug("saving record to db: {}",record);
-
             User selectedUser = LiftbotUtil.getUserWithId(context,record.getUserid());
             log.info("the [exercise_save] action is being performed on user: [{}]", selectedUser.getName());
+
+            List<LayoutBlock> recordView;
+            try {
+                Double.parseDouble(record.getWeight());
+                recordView = new RecordsView(selectedUser).getAllRecordsView(repo);
+            } catch (NumberFormatException e) {
+                recordView = new RecordsView(selectedUser).getAddRecordView();
+                ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
+            }
+
+            repo.save(record);
+            log.debug("saving record to db: {}",record);
 
             View savedRecordView = View.builder()
                     .type("home")
                     .privateMetadata(selectedUser.getId())
-                    .blocks(new RecordsView(selectedUser).getAllRecordsView(repo))
+                    .blocks(recordView)
                     .build();
             ViewsPublishRequest updateView = ViewsPublishRequest.builder()
                     .view(savedRecordView)
