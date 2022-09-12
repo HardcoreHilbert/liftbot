@@ -145,23 +145,6 @@ public class LiftbotApp {
         });
     }
 
-    private void validationErrorOnWeight() {
-        new RecordsView(selectedUser).getAddRecordView()
-        View addRecordView = View.builder()
-                .type("home")
-                .privateMetadata(selectedUser.getId())
-                .blocks(new RecordsView(selectedUser).getAddRecordView())
-                .build();
-        ViewsPublishRequest addView = ViewsPublishRequest.builder()
-                .view(addRecordView)
-                .token(context.getBotToken())
-                .userId(request.getPayload().getUser().getId())
-                .build();
-        context.client().viewsPublish(addView);
-
-        return context.ack();
-    }
-
     private void initSaveRecordAction(App liftbotApp) {
         log.info("initializing Save Record action");
         liftbotApp.blockAction("exercise_save", (request,context) -> {
