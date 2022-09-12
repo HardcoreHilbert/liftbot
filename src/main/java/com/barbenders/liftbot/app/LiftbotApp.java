@@ -157,13 +157,12 @@ public class LiftbotApp {
             try {
                 Double.parseDouble(record.getWeight());
                 recordView = new RecordsView(selectedUser).getAllRecordsView(repo);
+                repo.save(record);
+                log.debug("saving record to db: {}",record);
             } catch (NumberFormatException e) {
                 recordView = new RecordsView(selectedUser).getAddRecordView();
                 ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
             }
-
-            repo.save(record);
-            log.debug("saving record to db: {}",record);
 
             View savedRecordView = View.builder()
                     .type("home")
