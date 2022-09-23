@@ -40,8 +40,16 @@ public class RecordsView {
 
         for(Exercise record : allRecords) {
             blocks.add(new DividerBlock());
-            blocks.add(SectionBlock.builder()
-                    .text(MarkdownTextObject.builder().text("*"+record.getName()+"*").build()).build()
+            blocks.add(
+                    SectionBlock.builder()
+                            .text(MarkdownTextObject.builder().text("*"+record.getName()+"*").build())
+                            .accessory(
+                                    ButtonElement.builder()
+                                            .text(PlainTextObject.builder().text("Delete").build())
+                                            .actionId("delete_record")
+                                            .value(record.getId())
+                                            .build()
+                            ).build()
             );
             blocks.add(SectionBlock.builder()
                     .text(MarkdownTextObject.builder().text("("+record.getEquipment()+") : "

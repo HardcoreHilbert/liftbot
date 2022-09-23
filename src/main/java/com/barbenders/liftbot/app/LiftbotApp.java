@@ -48,6 +48,7 @@ public class LiftbotApp {
         initViewRecordsAction(liftbotApp);
         initSaveRecordAction(liftbotApp);
         initHomeNavAction(liftbotApp);
+        initDeleteRecordAction(liftbotApp);
 
         return liftbotApp;
     }
@@ -187,5 +188,34 @@ public class LiftbotApp {
             ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
         }
         return recordView;
+    }
+
+    private void initDeleteRecordAction(App liftbotApp) {
+        log.info("initializing Save Record action");
+        liftbotApp.blockAction("delete_record", (request,context) -> {
+
+            String recordId = request.getPayload().getActions().get(0).getValue();
+            log.info("delete this record: {}", recordId);
+
+            repo.deleteById(recordId);
+
+            User selectedUser = LiftbotUtil.getUserWithId(context,request.getPayload().getView().getPrivateMetadata());
+
+            List<LayoutBlock> recordView = new RecordsView(selectedUser).getAllRecordsView(repo);
+
+            View savedRecordView = View.builder()
+                    .type("home")
+                    .privateMetadata(selectedUser.getId())
+                    .blocks(recordView)
+                    .build();
+            ViewsPublishRequest updateView = ViewsPublishRequest.builder()
+                    .view(savedRecordView)
+                    .token(context.getBotToken())
+                    .userId(request.getPayload().getUser().getId())
+                    .build();
+            context.client().viewsPublish(updateView);
+
+            return context.ack();
+        });
     }
 }
