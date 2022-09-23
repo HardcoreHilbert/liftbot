@@ -51,9 +51,9 @@ public class LiftbotUtil {
 
         record.setUserid(payload.getView().getPrivateMetadata());
         record.setName(new ArrayList<>(vsValues.get("exercise_name_input").values()).get(0).getValue());
-        record.setEquipment(vsValues.get("equipment_needed_input_block").get("equipment_needed_input").getSelectedOption().getText().toString());
-        record.setSets(vsValues.get("sets_input_block").get("sets_input").getSelectedOption().getText().toString());
-        record.setReps(vsValues.get("reps_input_block").get("reps_input").getSelectedOption().getText().toString());
+        record.setEquipment(vsValues.get("equipment_needed_input_block").get("equipment_needed_input").getSelectedOption().getText().getText());
+        record.setSets(vsValues.get("sets_input_block").get("sets_input").getSelectedOption().getText().getText());
+        record.setReps(vsValues.get("reps_input_block").get("reps_input").getSelectedOption().getText().getText());
         record.setWeight(new ArrayList<>(vsValues.get("weight_input").values()).get(0).getValue());
 
         return record;
