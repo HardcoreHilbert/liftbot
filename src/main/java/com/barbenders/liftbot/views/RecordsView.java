@@ -33,6 +33,13 @@ public class RecordsView {
         log.info("getting [All Records] view for [{}]", user.getProfile().getDisplayName());
         List<Exercise> allRecords = repo.getAllExercisesForUser(user.getId());
 
+        blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
+            {
+                add(ButtonElement.builder()
+                        .actionId("nav_home")
+                        .text(new PlainTextObject("Back", true)).build());
+            }
+        }).build());
         blocks.add(SectionBlock.builder()
                 .text(MarkdownTextObject.builder()
                         .text("*"+user.getProfile().getDisplayName()+"*").build())
@@ -57,13 +64,6 @@ public class RecordsView {
                     ).build()
             );
         }
-        blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
-            {
-                add(ButtonElement.builder()
-                        .actionId("nav_home")
-                        .text(new PlainTextObject("Back", true)).build());
-            }
-        }).build());
         return blocks;
     }
 
