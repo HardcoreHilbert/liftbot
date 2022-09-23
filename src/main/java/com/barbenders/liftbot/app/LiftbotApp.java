@@ -153,15 +153,12 @@ public class LiftbotApp {
             User selectedUser = LiftbotUtil.getUserWithId(context,record.getUserid());
             log.info("the [exercise_save] action is being performed on user: [{}]", selectedUser.getName());
 
-            List<LayoutBlock> recordView;
-            try {
-                Double.parseDouble(record.getWeight());
-                recordView = new RecordsView(selectedUser).getAllRecordsView(repo);
-                repo.save(record);
+            List<LayoutBlock> recordView = validateSaveRecordAction(record, selectedUser);
+
+            if(recordView == null) {
                 log.debug("saving record to db: {}",record);
-            } catch (NumberFormatException e) {
-                recordView = new RecordsView(selectedUser).getAddRecordView();
-                ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
+                repo.save(record);
+                recordView = new RecordsView(selectedUser).getAllRecordsView(repo);
             }
 
             View savedRecordView = View.builder()
@@ -178,5 +175,17 @@ public class LiftbotApp {
 
             return context.ack();
         });
+    }
+
+    private List<LayoutBlock> validateSaveRecordAction(Exercise record, User selectedUser) {
+        List<LayoutBlock> recordView = null;
+        try {
+            Double.parseDouble(record.getWeight());
+            log.debug("saving record to db: {}",record);
+        } catch (NumberFormatException e) {
+            recordView = new RecordsView(selectedUser).getAddRecordView();
+            ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
+        }
+        return recordView;
     }
 }
