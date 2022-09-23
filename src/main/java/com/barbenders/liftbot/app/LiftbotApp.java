@@ -182,10 +182,13 @@ public class LiftbotApp {
         List<LayoutBlock> recordView = null;
         try {
             Double.parseDouble(record.getWeight());
-            log.debug("saving record to db: {}",record);
         } catch (NumberFormatException e) {
-            recordView = new RecordsView(selectedUser).getAddRecordView();
-            ((InputBlock)recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)",true));
+            try{
+                Integer.parseInt(record.getWeight());
+            } catch (NumberFormatException ne) {
+                recordView = new RecordsView(selectedUser).getAddRecordView();
+                ((InputBlock) recordView.get(5)).setLabel(new PlainTextObject("Weight (MUST BE A NUMBER)", true));
+            }
         }
         return recordView;
     }
