@@ -43,17 +43,18 @@ public class RecordsView {
             blocks.add(
                     SectionBlock.builder()
                             .text(MarkdownTextObject.builder().text("*"+record.getName()+"*").build())
-                            .accessory(
-                                    ButtonElement.builder()
-                                            .text(PlainTextObject.builder().text("Delete").build())
-                                            .actionId("delete_record")
-                                            .value(record.getId())
-                                            .build()
-                            ).build()
+                            .build()
             );
             blocks.add(SectionBlock.builder()
                     .text(MarkdownTextObject.builder().text("("+record.getEquipment()+") : "
-                            +record.getSets()+" x "+record.getReps()+" x "+record.getWeight()+"lb").build()).build()
+                            +record.getSets()+" x "+record.getReps()+" x "+record.getWeight()+"lb").build())
+                    .accessory(
+                            ButtonElement.builder()
+                                    .text(PlainTextObject.builder().text("Delete").build())
+                                    .actionId("delete_record")
+                                    .value(record.getId())
+                                    .build()
+                    ).build()
             );
         }
         blocks.add(ActionsBlock.builder().elements(new ArrayList<BlockElement>(){
